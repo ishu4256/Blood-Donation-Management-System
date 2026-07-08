@@ -7,31 +7,23 @@ if($conn->connect_error){
 }
 
 if(isset($_POST['next'])){
-    $name = $conn->real_escape_string($_POST['name']);
-    $full_name = $conn->real_escape_string($_POST['full_name']);
-    $address = $conn->real_escape_string($_POST['address']);
-    $contact_no = $conn->real_escape_string($_POST['contact_no']);
-    $email = $conn->real_escape_string($_POST['email']);
-    $nic = $conn->real_escape_string($_POST['nic']);
-    $dob = $conn->real_escape_string($_POST['dob']);
-    $sex = $conn->real_escape_string($_POST['sex']);
-    $country = $conn->real_escape_string($_POST['country']);
-    $province = $conn->real_escape_string($_POST['province']);
-    $district = $conn->real_escape_string($_POST['district']);
-    $blood_group = $conn->real_escape_string($_POST['blood_group']);
+    // Form එකෙන් එන දත්ත Session එකට සේව් කර ගැනීම
+    $_SESSION['reg_name'] = $conn->real_escape_string($_POST['name']);
+    $_SESSION['reg_full_name'] = $conn->real_escape_string($_POST['full_name']);
+    $_SESSION['reg_address'] = $conn->real_escape_string($_POST['address']);
+    $_SESSION['reg_contact_no'] = $conn->real_escape_string($_POST['contact_no']);
+    $_SESSION['reg_email'] = $conn->real_escape_string($_POST['email']);
+    $_SESSION['reg_nic'] = $conn->real_escape_string($_POST['nic']);
+    $_SESSION['reg_dob'] = $conn->real_escape_string($_POST['dob']);
+    $_SESSION['reg_sex'] = $conn->real_escape_string($_POST['sex']);
+    $_SESSION['reg_country'] = $conn->real_escape_string($_POST['country']);
+    $_SESSION['reg_province'] = $conn->real_escape_string($_POST['province']);
+    $_SESSION['reg_district'] = $conn->real_escape_string($_POST['district']);
+    $_SESSION['reg_blood_group'] = $conn->real_escape_string($_POST['blood_group']);
 
-    $sql = "INSERT INTO donor_details 
-            (name, full_name, address, contact_no, email, nic, date_of_birth, sex, country, province, district, blood_group) 
-            VALUES 
-            ('$name','$full_name','$address','$contact_no','$email','$nic','$dob','$sex','$country','$province','$district','$blood_group')";
-
-    if($conn->query($sql) === TRUE){
-        $_SESSION['donor_id'] = $conn->insert_id;
-        header("Location: New Account2.php");
-        exit();
-    } else {
-        echo "Error: " . $conn->error;
-    }
+    // ඊළඟ පිටුවට පරිශීලකයාව රැගෙන යාම
+    header("Location: New Account2.php");
+    exit();
 }
 ?>
 
@@ -45,9 +37,26 @@ if(isset($_POST['next'])){
         h2 { background-color:white; color:black; font-size:40px; text-align:center; margin-top:20px; }
         .form-box { width:700px; margin:auto; background:white; padding:35px; border-radius:10px; box-shadow:0px 0px 10px gray; }
         label { display:inline-block; width:150px; font-size:18px; font-weight:bold; margin-bottom:10px; }
-        input, select { width:60%; padding:8px; margin-bottom:10px; font-size:16px; }
-        .btn { padding:12px 30px; background-color:red; color:white; border:none; font-size:20px; cursor:pointer; border-radius:5px; width:auto; }
-        .btn:hover { background-color:darkred; }
+        input, select { width:60%; padding:8px; margin-bottom:10px; font-size:16px; box-sizing: border-box; }
+        
+       .btn { 
+            display: inline-block; 
+            width: 160px; 
+            height: 48px; 
+            line-height: 48px; 
+            background-color: red; 
+            color: white; 
+            border: none; 
+            font-size: 20px; 
+            cursor: pointer; 
+            border-radius: 5px; 
+            text-decoration: none; 
+            text-align: center;
+            box-sizing: border-box; 
+            padding: 0; 
+        }
+        .btn:hover { background-color: darkred; }
+        .button-group { text-align: center; margin-top: 25px; }
     </style>
 </head>
 <body>
@@ -105,8 +114,9 @@ if(isset($_POST['next'])){
                 <option value="AB-">AB-</option>
             </select><br><br>
 
-            <div style="text-align: center;">
-                <input type="submit" name="next" value="Submit" class="btn">
+            <div class="button-group">
+                <input type="submit" name="next" value="Next" class="btn">
+                <a href="login.php" class="btn">Cancel</a>
             </div>
         </form>
     </div>

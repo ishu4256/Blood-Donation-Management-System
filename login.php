@@ -1,5 +1,6 @@
 <?php
 session_start();
+unset($_SESSION['welcome_shown']);
 
 $conn = new mysqli("localhost", "root", "", "blood_donations");
 
@@ -18,17 +19,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $result = $conn->query($sql);
 
     if ($result->num_rows > 0) {
-        $row = $result->fetch_assoc();
 
-        $_SESSION['username'] = $row['username'];
-        // role column එකක් ඇත්නම් පමණක් මෙය වැඩ කරයි
-        $_SESSION['role'] = isset($row['role']) ? $row['role'] : 'user'; 
+    $row = $result->fetch_assoc();
 
+    $_SESSION['username'] = $row['username'];
+    $_SESSION['role'] = $row['role'];
+
+    if($row['role'] == 'admin'){
+        header("Location: admin_dashboard.php");
+        exit();
+    }
+    else{
         header("Location: Dashboard.php");
         exit();
-    } else {
-        $error = "Invalid Username or Password!";
     }
+}
+else{
+    $error = "Invalid Username or Password!";
+}
 }
 ?>
 
@@ -45,6 +53,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         input[type=text], input[type=password] { width:80%; padding:10px; margin:10px; font-size:18px; }
         .btn { padding:12px 25px; font-size:18px; text-decoration:none; border:none; cursor:pointer; border-radius:5px; }
         .login-btn { background-color:red; color:white; }
+        .btn-danger{background-color:red; color:white;}
         .login-btn:hover { background-color:darkred; }
         .link-btn { text-decoration:none; color:blue; font-size:18px; font-family: Arial; }
         .error { color:red; font-size:20px; margin-bottom:15px; }
@@ -68,8 +77,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <a href="ForgetPassword.php" class="link-btn">Forget Password</a> &nbsp;&nbsp;&nbsp; 
             <a href="New Account1.php" class="link-btn">Create New Account</a>
             <br><br><br>
+<pre>
+            <input type="submit" value="LOGIN" class="btn login-btn">                          <a href="javascript:history.back()" class="btn btn-danger">Exit</a>
+</pre>
 
-            <input type="submit" value="LOGIN" class="btn login-btn">
         </form>
     </div>
 

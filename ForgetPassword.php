@@ -1,36 +1,44 @@
 <?php
 session_start();
 
-$conn = new mysqli("localhost","root","","blood_donations");
+$conn = new mysqli("localhost", "root", "", "blood_donations");
 
 if($conn->connect_error){
     die("Connection Failed: " . $conn->connect_error);
 }
 
+$error_msg = "";
+
 if(isset($_POST['done'])){
 
-    $username = $_POST['username'];
-    $phone = $_POST['phone'];
+    $username = $conn->real_escape_string($_POST['username']);
+    $phone = $conn->real_escape_string($_POST['phone']);
 
-   $sql = "SELECT * FROM donor_details
-        WHERE contact_no='$phone'";
-
+    // ටේබල් දෙක INNER JOIN එකක් මඟින් එකතු කර පරීක්ෂා කිරීම
+    $sql = "SELECT u.*, d.contact_no 
+            FROM users u 
+            INNER JOIN donor_details d ON u.donor_id = d.donor_id 
+            WHERE u.username='$username' AND d.contact_no='$phone'";
+            
     $result = $conn->query($sql);
-echo "<pre>";
-print_r($result);
-echo "</pre>";
-    if($result->num_rows > 0){
 
-        $otp = rand(100000,999999);
+    if($result && $result->num_rows > 0){
 
+        $otp = rand(100000, 999999);
+
+        // සෙෂන් එකට දත්ත දමා ගැනීම
         $_SESSION['reset_username'] = $username;
         $_SESSION['otp'] = $otp;
 
-        header("Location: VerifyOTP.php");
+        // 💡 ටෙස්ට් කිරීමට පහසු වීම සඳහා OTP එක Alert එකක් ලෙස පෙන්වා VerifyOTP.php වෙත යයි
+        echo "<script>
+                alert('Test OTP is: $otp'); 
+                window.location.href='VerifyOTP.php';
+              </script>";
         exit();
 
     } else {
-        echo "Invalid Username or Phone Number!";
+        $error_msg = "Invalid Username or Phone Number!";
     }
 }
 ?>
@@ -38,99 +46,41 @@ echo "</pre>";
 <html>
 <head>
     <title>Online Blood Donation Management System</title>
-
     <style type="text/css">
-
-        body{
-            font-family: Arial;
-            background-color:#f2f2f2;
-        }
-
-        h1{
-            background-color: red;
-            color: white;
-            font-size: 50px;
-            padding: 20px;
-            margin:0;
-        }
-
-        h2{
-            background-color:white;
-            color: black;
-            font-size: 40px;
-            margin-top:20px;
-        }
-
-        .login-box{
-            width:500px;
-            margin:auto;
-            background:white;
-            padding:30px;
-            border-radius:10px;
-            box-shadow:0px 0px 10px gray;
-            text-align:center;
-        }
-
-        label{
-            font-size:20px;
-            font-weight:bold;
-        }
-
-        input[type=text], input[type=password]{
-            width:80%;
-            padding:10px;
-            margin:10px;
-            font-size:18px;
-        }
-
-        .btn{
-            padding:12px 25px;
-            font-size:18px;
-            text-decoration:none;
-            border:none;
-            cursor:pointer;
-            border-radius:5px;
-        }
-
-        .d1{
-            background-color:red;
-            color:white;
-        }
-
-        
-
-        .login-box{
-            color:black;
-            font-size:18px;
-                        font-family: Arial;
-
-        }
-
-        .error{
-            color:red;
-            font-size:20px;
-            margin-bottom:15px;
-        }
-
+        body{ font-family: Arial, sans-serif; background-color:#f2f2f2; margin: 0; }
+        h1{ background: red; color: white; font-size: 40px; padding: 20px; margin:0; text-align: center; }
+        h2{ color: black; font-size: 30px; margin-top:20px; text-align: center; }
+        .login-box{ width:450px; margin:30px auto; background:white; padding:30px; border-radius:10px; box-shadow:0px 0px 10px gray; }
+        label{ font-size:16px; font-weight:bold; display: block; margin-top: 15px; }
+        input[type=text]{ width: 100%; padding: 10px; margin-top: 5px; font-size: 16px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        .btn-container { margin-top: 20px; display: flex; justify-content: space-between; }
+        .btn{ padding: 10px 25px; font-size: 16px; border: none; cursor: pointer; border-radius: 5px; font-weight: bold; text-decoration: none; text-align: center; }
+        .btn-submit{ background-color: red; color: white; }
+        .btn-cancel{ background-color: #6c757d; color: white; }
+        .error{ color: red; font-size: 16px; margin-bottom: 15px; text-align: center; font-weight: bold; }
     </style>
 </head>
-
 <body>
 
-    <div class="d1">
-        <center><h1>Blood Donation Management System</h1></center>
-    </div>
-
-    <div class="d2">
-        <center><h2>Forget Password</h2></center>
-    </div>
+    <h1>Blood Donation Management System</h1>
+    <h2>Forget Password</h2>
 
     <div class="login-box">
-<form method="POST">
-    Username: <input type="text" name="username" required><br><br>
-    Phone Number: <input type="text" name="phone" required><br><br>
-    <input type="submit" name="done" value="DONE">
-</form>
-</div>
+        <?php if(!empty($error_msg)) { echo "<div class='error'>$error_msg</div>"; } ?>
+
+        <form method="POST" action="">
+            <label>Username:</label>
+            <input type="text" name="username" required>
+
+            <label>Phone Number:</label>
+            <input type="text" name="phone" required>
+
+            <div class="btn-container">
+                <button type="submit" name="done" class="btn btn-submit">SUBMIT</button> 
+                <a href="login.php" class="btn btn-cancel">Cancel</a>
+            </div>
+        </form>
+    </div>
+
 </body>
 </html>
