@@ -1,5 +1,4 @@
 <?php
-// session එක පරීක්ෂා කිරීම
 session_start();
 if(!isset($_SESSION['username']) || $_SESSION['role'] != 'admin'){
     header("Location: login.php");
@@ -7,37 +6,49 @@ if(!isset($_SESSION['username']) || $_SESSION['role'] != 'admin'){
 }
 
 $conn = new mysqli("localhost", "root", "", "blood_donations");
-
 if($conn->connect_error){
     die("Connection Failed : " . $conn->connect_error);
+}
+
+// AJAX Request
+if(isset($_GET['get_hospitals_by_district'])) {
+    $district = $conn->real_escape_string($_GET['get_hospitals_by_district']);
+    $query = "SELECT name FROM hospitals WHERE district = '$district' ORDER BY name ASC";
+    $result = $conn->query($query);
+    
+    $hospitals = [];
+    if($result && $result->num_rows > 0) {
+        while($row = $result->fetch_assoc()) {
+            $hospitals[] = $row['name'];
+        }
+    }
+    header('Content-Type: application/json');
+    echo json_encode($hospitals);
+    exit();
 }
 
 $message = "";
 $message_class = "";
 
-// Form එක Submit කළ පසු ක්‍රියාත්මක වන කොටස
 if(isset($_POST['submit_stock'])){
-    // Form එකෙන් දත්ත ලබා ගැනීම
-    $hospital_name = $_POST['hospital_name']; // මෙතනට එන්නේ dropdown එකෙන් තෝරන රෝහලේ නම
-    $blood_group = $_POST['blood_group'];
+    $district = $_POST['district']; 
+    $hospital_name = $_POST['hospital_name']; 
+    $blood_group = strtoupper($_POST['blood_group']); // Capital O/A/B කිරීමට
     $units = intval($_POST['units']);
 
-    if(!empty($hospital_name) && !empty($blood_group) && $units >= 0){
+    if(!empty($district) && !empty($hospital_name) && !empty($blood_group) && $units > 0){
         
-        /* 💡 ON DUPLICATE KEY UPDATE:
-          blood_stock ටේබල් එකේ 'name' සහ 'blood_group' කියන දෙක එකතු වෙලා UNIQUE INDEX එකක් තියෙනවා නම්,
-          දැනටමත් තියෙන රෝහලක ලේ තොගය අලුතින් ඇතුලත් නොකර පවතින තොගයට එකතු (UPDATE) කරනු ලබයි.
-          නැතහොත් අලුත් පේළියක් (INSERT) සාදයි.
-        */
-        $stmt = $conn->prepare("INSERT INTO blood_stock (blood_group, units, name) VALUES (?, ?, ?) 
+        $stmt = $conn->prepare("INSERT INTO blood_stock (name, district, blood_group, units, collected_date) 
+                                VALUES (?, ?, ?, ?, CURDATE()) 
                                 ON DUPLICATE KEY UPDATE units = units + ?");
-        $stmt->bind_param("sisi", $blood_group, $units, $hospital_name, $units);
+        
+        $stmt->bind_param("sssii", $hospital_name, $district, $blood_group, $units, $units);
         
         if($stmt->execute()){
             $message = "Blood stock successfully added/updated!";
             $message_class = "alert-success";
         } else {
-            $message = "Error: Something went wrong. " . $conn->error;
+            $message = "Error: " . $conn->error;
             $message_class = "alert-danger";
         }
     } else {
@@ -45,9 +56,6 @@ if(isset($_POST['submit_stock'])){
         $message_class = "alert-warning";
     }
 }
-
-// Dropdown එක සඳහා රෝහල් ලැයිස්තුව ඩේටාබේස් එකෙන් ලබා ගැනීම
-$hospitals_result = $conn->query("SELECT name FROM hospitals ORDER BY name ASC");
 ?>
 
 <!DOCTYPE html>
@@ -56,27 +64,10 @@ $hospitals_result = $conn->query("SELECT name FROM hospitals ORDER BY name ASC")
     <title>Add Blood Stock</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body {
-            background: #f4f6f9;
-            font-family: Arial;
-        }
-        .form-container {
-            max-width: 500px;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 15px #ccc;
-            margin: 50px auto;
-        }
-        .btn-custom {
-            background-color: #8e0000;
-            color: white;
-            border: none;
-        }
-        .btn-custom:hover {
-            background-color: #6f0000;
-            color: white;
-        }
+        body { background: #31080c; font-family: Arial; }
+        .form-container { max-width: 500px; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 15px #ccc; margin: 50px auto; }
+        .btn-custom { background-color: #8e0000; color: white; border: none; }
+        .btn-custom:hover { background-color: #6f0000; color: white; }
     </style>
 </head>
 <body>
@@ -93,20 +84,21 @@ $hospitals_result = $conn->query("SELECT name FROM hospitals ORDER BY name ASC")
         <?php endif; ?>
 
         <form method="POST" action="add_blood_stock.php">
+             <div class="mb-3">
+                <label class="form-label fw-bold">District</label>
+                <select name="district" id="districtSelect" class="form-control" required>
+                    <option value="">-- Select District --</option>
+                    <?php
+                    $districts = ["Colombo", "Gampaha", "Kalutara", "Kandy", "Matale", "Nuwara Eliya", "Galle", "Matara", "Hambantota", "Jaffna", "Kilinochchi", "Mannar", "Vavuniya", "Mullaitivu", "Batticaloa", "Ampara", "Trincomalee", "Kurunegala", "Puttalam", "Anuradhapura", "Polonnaruwa", "Badulla", "Monaragala", "Ratnapura", "Kegalle"];
+                    foreach($districts as $dist) { echo "<option value='$dist'>$dist</option>"; }
+                    ?>
+                </select>
+            </div>
             
             <div class="mb-3">
                 <label class="form-label fw-bold">Select Hospital</label>
-                <select name="hospital_name" class="form-control" required>
-                    <option value="">-- Select Hospital --</option>
-                    <?php 
-                    if($hospitals_result && $hospitals_result->num_rows > 0){
-                        while($row = $hospitals_result->fetch_assoc()){
-                            echo "<option value='".htmlspecialchars($row['name'])."'>".htmlspecialchars($row['name'])."</option>";
-                        }
-                    } else {
-                        echo "<option value=''>No hospitals found</option>";
-                    }
-                    ?>
+                <select name="hospital_name" id="hospitalSelect" class="form-control" required>
+                    <option value="">-- Select District First --</option>
                 </select>
             </div>
 
@@ -132,13 +124,39 @@ $hospitals_result = $conn->query("SELECT name FROM hospitals ORDER BY name ASC")
 
             <div class="d-grid gap-2">
                 <button type="submit" name="submit_stock" class="btn btn-custom">Add Stock</button>
-                <a href="admin_dashboard.php" class="btn btn-secondary">Back to Dashboard</a>
+                <a href="blood_stock.php" class="btn btn-secondary">Back</a>
             </div>
-
         </form>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.getElementById('districtSelect').addEventListener('change', function() {
+    var district = this.value;
+    var hospitalSelect = document.getElementById('hospitalSelect');
+    hospitalSelect.innerHTML = '<option value="">-- Loading Hospitals... --</option>';
+    
+    if(district === '') {
+        hospitalSelect.innerHTML = '<option value="">-- Select District First --</option>';
+        return;
+    }
+    
+    fetch('add_blood_stock.php?get_hospitals_by_district=' + encodeURIComponent(district))
+        .then(response => response.json())
+        .then(data => {
+            hospitalSelect.innerHTML = '<option value="">-- Select Hospital --</option>';
+            if(data.length > 0) {
+                data.forEach(function(hospital) {
+                    var option = document.createElement('option');
+                    option.value = hospital;
+                    option.textContent = hospital;
+                    hospitalSelect.appendChild(option);
+                });
+            } else {
+                hospitalSelect.innerHTML = '<option value="">No hospitals found in this district</option>';
+            }
+        });
+});
+</script>
 </body>
 </html>

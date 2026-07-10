@@ -1,5 +1,7 @@
 <?php
-use PHPMailer\PHPMailer\PHPMailer; use PHPMailer\PHPMailer\Exception; require 'vendor/autoload.php';
+use PHPMailer\PHPMailer\PHPMailer; 
+use PHPMailer\PHPMailer\Exception; 
+require 'vendor/autoload.php';
 session_start();
 
 // Admin කෙනෙක්දැයි පරීක්ෂා කිරීම (Security)
@@ -51,13 +53,12 @@ if(isset($_GET['approve_id'])){
 
         if($conn->query($approve_query)){
 
-            // Same district donors පමණක්
-           $donors = $conn->query("
-    SELECT full_name, email
-    FROM donor
-    WHERE email IS NOT NULL
-    AND email != ''
-
+            // Same district donors පමණක් ලැබීමට අවශ්‍ය නම් WHERE district = '$district' ලෙස වෙනස් කරන්න.
+            $donors = $conn->query("
+                SELECT full_name, email
+                FROM donor
+                WHERE email IS NOT NULL
+                AND email != ''
             ");
 
             if($donors && $donors->num_rows > 0){
@@ -67,15 +68,13 @@ if(isset($_GET['approve_id'])){
                     try{
 
                         $mail = new PHPMailer(true);
-$mail->SMTPDebug = 0;
-$mail->Debugoutput = 'html';
+                        $mail->SMTPDebug = 0;
+                        $mail->Debugoutput = 'html';
                         $mail->isSMTP();
                         $mail->Host = 'smtp.gmail.com';
                         $mail->SMTPAuth = true;
 
                         $mail->Username = 'sandarekaishani83@gmail.com';
-
-                        // මෙතන අලුත් App Password එක දාන්න
                         $mail->Password = 'zmnr dbgs jxhv kqqk';
 
                         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
@@ -96,9 +95,7 @@ $mail->Debugoutput = 'html';
 
                         $mail->Body = "
                         <h2>Dear $name,</h2>
-
                         <p>A new blood donation campaign has been approved in your district.</p>
-
                         <table border='1' cellpadding='8' cellspacing='0'>
                             <tr><td><b>Campaign</b></td><td>$title</td></tr>
                             <tr><td><b>Organizer</b></td><td>$organizer</td></tr>
@@ -108,20 +105,16 @@ $mail->Debugoutput = 'html';
                             <tr><td><b>Time</b></td><td>$start_time - $end_time</td></tr>
                             <tr><td><b>Description</b></td><td>$description</td></tr>
                         </table>
-
                         <br>
-
                         <p>Please participate and help save lives through blood donation.</p>
-
-                        <p>Thank you,<br>
-                        Blood Donation Management System</p>
+                        <p>Thank you,<br>Blood Donation Management System</p>
                         ";
 
                         $mail->send();
 
                     } catch (Exception $e) {
                         echo "Email Error : " . $mail->ErrorInfo;
-    exit();
+                        exit();
                     }
                 }
             }
@@ -130,32 +123,45 @@ $mail->Debugoutput = 'html';
                 alert('Campaign approved and email notifications sent successfully!');
                 window.location.href='campaigns.php';
             </script>";
-
             exit();
         }
     }
 }
 
-// ➕ 1. ADMIN DIRECTLY ADD BLOOD STOCK LOGIC (Collected Date එක සමඟ)
+// ➕ 1. ADMIN DIRECTLY ADD BLOOD STOCK LOGIC (මැනුවලී එකතු කිරීම)
 if(isset($_POST['add_direct_stock'])){
     $district = $conn->real_escape_string($_POST['direct_district']);
     $hospital_name = $conn->real_escape_string($_POST['direct_hospital']); 
-    $blood_group = $conn->real_escape_string($_POST['direct_blood_group']);
+    $blood_group = strtoupper($conn->real_escape_string($_POST['direct_blood_group'])); // Capitalize Group
     $units = intval($_POST['direct_units']);
-    $collected_date = $conn->real_escape_string($_POST['direct_collected_date']); // 📅 ලබාගත් දිනය
+    $collected_date = $conn->real_escape_string($_POST['direct_collected_date']); 
 
     // එකම දවසේ, එකම රෝහලේ, එකම ලේ වර්ගය තිබේදැයි බැලීම
-    $stock_res = $conn->query("SELECT id FROM blood_stock WHERE district = '$district' AND blood_group = '$blood_group' AND name = '$hospital_name' AND collected_date = '$collected_date' LIMIT 1");
+    $stock_res = $conn->query("SELECT id FROM blood_stock WHERE district = '$district' AND name = '$hospital_name' AND blood_group = '$blood_group' AND collected_date = '$collected_date' LIMIT 1");
 
     if($stock_res && $stock_res->num_rows > 0){
-        // තිබේ නම් -> UNITS එකතු වේ
-        $conn->query("UPDATE blood_stock SET units = units + $units WHERE district = '$district' AND blood_group = '$blood_group' AND name = '$hospital_name' AND collected_date = '$collected_date'");
+        // තිබේ නම් -> Units අගය UPDATE වේ
+        $stock_row = $stock_res->fetch_assoc();
+        $stock_id = $stock_row['id'];
+        $update_query = "UPDATE blood_stock SET units = units + $units WHERE id = $stock_id";
+        
+        if($conn->query($update_query)){
+            echo "<script>alert('🎉 Blood stock updated successfully for $hospital_name!'); window.location.href='blood_stock.php';</script>";
+            exit();
+        } else {
+            echo "Error updating stock: " . $conn->error;
+        }
     } else {
-        // නැත්නම් -> INSERT (Collected Date එකත් සමඟ)
-        $conn->query("INSERT INTO blood_stock (name, district, blood_group, units, collected_date) VALUES ('$hospital_name', '$district', '$blood_group', $units, '$collected_date')");
+        // නැත්නම් -> අලුතින්ම INSERT වේ (District එකද සමඟ)
+        $insert_query = "INSERT INTO blood_stock (name, district, blood_group, units, collected_date) VALUES ('$hospital_name', '$district', '$blood_group', $units, '$collected_date')";
+        
+        if($conn->query($insert_query)){
+            echo "<script>alert('🎉 New blood stock manually added successfully!'); window.location.href='blood_stock.php';</script>";
+            exit();
+        } else {
+            echo "Error inserting stock: " . $conn->error;
+        }
     }
-    echo "<script>alert('🎉 Blood stock manually updated successfully for $hospital_name ($district)!'); window.location.href='campaigns.php';</script>";
-    exit();
 }
 
 // 📝 2. CAMPAIGN UPDATE (EDIT) LOGIC
@@ -189,12 +195,12 @@ if(isset($_POST['update_campaign'])){
     }
 }
 
-// 🔄 3. CAMPAIGN COMPLETION & REGIONAL STOCK UPDATE LOGIC (Collected Date සමඟ)
+// 🔄 3. CAMPAIGN COMPLETION & REGIONAL STOCK UPDATE LOGIC
 if(isset($_POST['complete_campaign'])){
     $campaign_id = intval($_POST['campaign_id']);
-    $blood_group = $conn->real_escape_string($_POST['blood_group']);
+    $blood_group = strtoupper($conn->real_escape_string($_POST['blood_group']));
     $units = intval($_POST['units']);
-    $collected_date = $conn->real_escape_string($_POST['collected_date']); // 📅 කැම්පේන් එකෙන් ලේ එකතු කල දිනය
+    $collected_date = $conn->real_escape_string($_POST['collected_date']); 
 
     // කැම්පේන් එකේ දිස්ත්‍රික්කය ලබා ගැනීම
     $camp_res = $conn->query("SELECT district FROM campaigns WHERE id = $campaign_id AND (status != 'Completed' OR status IS NULL)");
@@ -208,18 +214,16 @@ if(isset($_POST['complete_campaign'])){
         try {
             $conn->query("UPDATE campaigns SET status = 'Completed' WHERE id = $campaign_id");
             
-            // එකම රෝහලේ, එකම ලේ වර්ගය සහ එකම දිනයේ තොග තිබේදැයි බැලීම
             $stock_res = $conn->query("SELECT id FROM blood_stock WHERE district = '$district' AND blood_group = '$blood_group' AND name = '$hospital_name' AND collected_date = '$collected_date' LIMIT 1");
 
             if($stock_res && $stock_res->num_rows > 0){
                 $conn->query("UPDATE blood_stock SET units = units + $units WHERE district = '$district' AND blood_group = '$blood_group' AND name = '$hospital_name' AND collected_date = '$collected_date'");
             } else {
-                // ඩේටාබේස් එකට තෝරාගත් දිනය ඇතුළත් කිරීම
                 $conn->query("INSERT INTO blood_stock (name, district, blood_group, units, collected_date) VALUES ('$hospital_name', '$district', '$blood_group', $units, '$collected_date')");
             }
 
             $conn->commit();
-            echo "<script>alert('🎉 Campaign marked as Completed! Stock added successfully.'); window.location.href='campaigns.php';</script>";
+            echo "<script>alert('🎉 Campaign marked as Completed! Stock added successfully.'); window.location.href='blood_stock.php';</script>";
             exit();
         } catch (Exception $e) {
             $conn->rollback();
@@ -251,7 +255,7 @@ $result = $conn->query("SELECT * FROM campaigns ORDER BY id DESC");
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background: #f4f6f9; font-family: Arial, sans-serif; }
+        body { background:#31080c; font-family: Arial, sans-serif; }
         .topbar { background: #8e0000; color: white; padding: 15px; }
         .container-box { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 0 10px #ccc; margin-top: 20px; }
         h2, h4 { color: #8e0000; font-weight: bold; }
@@ -268,6 +272,7 @@ $result = $conn->query("SELECT * FROM campaigns ORDER BY id DESC");
     <h3>Blood Donation System - Admin Panel</h3>
     <div>
         <a href="admin_dashboard.php" class="btn btn-light btn-sm me-2">Admin Dashboard</a>
+        <a href="blood_stock.php" class="btn btn-warning btn-sm me-2 fw-bold">🩸 View Blood Stock</a>
         <a href="login.php" class="btn btn-light btn-sm">Log Out</a>
     </div>
 </div>
@@ -363,7 +368,6 @@ $result = $conn->query("SELECT * FROM campaigns ORDER BY id DESC");
                         while($row = $result->fetch_assoc()) { 
                             $current_status = (!empty($row['status'])) ? $row['status'] : 'Upcoming';
                             
-                            // Status එක අනුව බෑජ් එකේ පාට වෙනස් කිරීම
                             if($current_status == 'Completed') {
                                 $status_badge = 'badge-completed';
                             } elseif($current_status == 'Pending') {
@@ -373,7 +377,6 @@ $result = $conn->query("SELECT * FROM campaigns ORDER BY id DESC");
                             }
                             
                             $district_name = (!empty($row['district'])) ? htmlspecialchars($row['district']) : "Not Set";
-                            
                             $clean_start_time = substr($row['start_time'], 0, 8);
                             $clean_end_time = substr($row['end_time'], 0, 8);
                     ?>
@@ -394,9 +397,9 @@ $result = $conn->query("SELECT * FROM campaigns ORDER BY id DESC");
                         <td><span class="<?php echo $status_badge; ?>"><?php echo $current_status; ?></span></td>
                         <td class="text-center">
                             <div class="d-flex gap-1 justify-content-center flex-wrap">
-                                
                                 <?php if($current_status == 'Pending') { ?>
                                     <a href="campaigns.php?approve_id=<?php echo $row['id']; ?>" class="btn btn-sm btn-info text-white fw-bold" onclick="return confirm('Approve this user proposed campaign?')">✔ Approve</a>
+                                Aminated
                                 <?php } ?>
 
                                 <button type="button" class="btn btn-primary btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#editModal<?php echo $row['id']; ?>">✏️</button>
@@ -412,6 +415,7 @@ $result = $conn->query("SELECT * FROM campaigns ORDER BY id DESC");
                         </td>
                     </tr>
 
+                    <!-- Edit Modal -->
                     <div class="modal fade" id="editModal<?php echo $row['id']; ?>" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-lg">
                             <form method="POST" action="">
@@ -470,6 +474,7 @@ $result = $conn->query("SELECT * FROM campaigns ORDER BY id DESC");
                         </div>
                     </div>
 
+                    <!-- Complete Modal -->
                     <div class="modal fade" id="completeModal<?php echo $row['id']; ?>" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog">
                             <form method="POST" action="">
@@ -480,13 +485,12 @@ $result = $conn->query("SELECT * FROM campaigns ORDER BY id DESC");
                                     </div>
                                     <div class="modal-body text-start">
                                         <input type="hidden" name="campaign_id" value="<?php echo $row['id']; ?>">
-                                        <p class="text-muted">මෙම කඳවුරෙන් එකතු වූ ලේ ප්‍රමාණය සහ දිනය ඇතුළත් කරන්න. එය ස්වයංක්‍රීයවම <strong><?php echo $district_name; ?></strong> දිස්ත්‍රික්කයේ රෝහලට එකතු වේ.</p>
+                                        <p class="text-muted">මෙම කඳවුරෙන් එකතු වූ ලේ ප්‍රමාණය සහ දිනය ඇතුළත් කරන්න. එය ස්වයංක්‍රීයවම <strong><?php echo $district_name; ?></strong> දිസ്ත්‍රික්කයේ රෝහලට එකතු වේ.</p>
                                         
                                         <div class="mb-3">
                                             <label class="form-label fw-bold">Collected Date (ලේ එකතු කළ දිනය)</label>
                                             <input type="date" name="collected_date" class="form-control" value="<?php echo $row['campaign_date']; ?>" required>
                                         </div>
-
                                         <div class="mb-3">
                                             <label class="form-label fw-bold">Blood Group</label>
                                             <select name="blood_group" class="form-select" required>
@@ -542,6 +546,7 @@ function fetchHospitals(districtName) {
     }
 
     var xhr = new XMLHttpRequest();
+    // ඔබගේ AJAX පිටුවට නිවැරදි Path එක ලබා දී ඇති බව තහවුරු කරගන්න (e.g. get_hospitals.php)
     xhr.open("GET", "get_hospitals.php?district=" + encodeURIComponent(districtName), true);
     
     xhr.onreadystatechange = function () {

@@ -70,7 +70,7 @@ $hospitals_result = $conn->query("SELECT name FROM hospitals ORDER BY name ASC")
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background: #f4f6f9;
+            background: #31080c;
             font-family: Arial, sans-serif;
         }
         .form-container {

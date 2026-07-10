@@ -22,7 +22,7 @@ $result = $conn->query($query);
     <title>Released Blood History - Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background: #f4f6f9; font-family: Arial, sans-serif; }
+        body { background: #31080c; font-family: Arial, sans-serif; }
         .topbar { background: #2c3e50; color: white; padding: 15px; }
         .container-box { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 0 10px #ccc; margin-top: 30px; }
         .table th { background-color: #2c3e50 !important; color: white !important; }

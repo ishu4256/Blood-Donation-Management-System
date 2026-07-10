@@ -13,7 +13,7 @@ if($conn->connect_error){
 }
 
 if(isset($_POST['save'])){
-    // Form එකෙන් එන දත්ත ආරක්ෂිතව ලබා ගැනීම (SQL Injection වැළැක්වීමට real_escape_string භාවිත කර ඇත)
+    // Form එකෙන් එන සාමාන්‍ය දත්ත ආරක්ෂිතව ලබා ගැනීම
     $full_name = $conn->real_escape_string($_POST['full_name']);
     $nic = $conn->real_escape_string($_POST['nic']);
     $dob = !empty($_POST['dob']) ? $conn->real_escape_string($_POST['dob']) : NULL;
@@ -27,15 +27,37 @@ if(isset($_POST['save'])){
     $diseases = !empty($_POST['diseases']) ? $conn->real_escape_string($_POST['diseases']) : 'no';
     $medicines = !empty($_POST['medicines']) ? $conn->real_escape_string($_POST['medicines']) : 'no';
     
-    // සෙවුම් පද්ධතියේ පහසුව සඳහා පළාත සහ දිස්ත්‍රික්කය සිම්පල් අකුරෙන්ම (lowercase) සුරැකීම
     $province = strtolower(trim($conn->real_escape_string($_POST['province'])));
     $district = strtolower(trim($conn->real_escape_string($_POST['district'])));
 
-    // 💡 සියලුම තීරු ඇතුළත් කර සකස් කළ INSERT Query එක (ඩේටාබේස් එකේ ඇති 'Districrt' අක්ෂර වින්‍යාසය අනුවම සකසා ඇත)
+    // 📁 Files Upload කිරීමේ ක්‍රියාවලිය
+    $target_dir = "uploads/";
+    
+    // 1. NIC Copy Upload එක හැසිරවීම
+    $nic_copy = "";
+    if(!empty($_FILES['nic_copy']['name'])) {
+        $nic_filename = time() . "_nic_" . basename($_FILES["nic_copy"]["name"]);
+        $nic_target = $target_dir . $nic_filename;
+        if(move_uploaded_file($_FILES["nic_copy"]["tmp_name"], $nic_target)) {
+            $nic_copy = $nic_filename;
+        }
+    }
+
+    // 2. Profile Photo Upload එක හැසිරවීම
+    $profile_photo = "";
+    if(!empty($_FILES['profile_photo']['name'])) {
+        $profile_filename = time() . "_profile_" . basename($_FILES["profile_photo"]["name"]);
+        $profile_target = $target_dir . $profile_filename;
+        if(move_uploaded_file($_FILES["profile_photo"]["tmp_name"], $profile_target)) {
+            $profile_photo = $profile_filename;
+        }
+    }
+
+    // 💡 nic_copy සහ profile_photo තීරුද ඇතුළත් කළ නව INSERT Query එක
     $sql = "INSERT INTO donor 
-            (full_name, nic, dob, gender, phone, email, address, blood_group, weight, last_donation_date, diseases, medicines, availability_status, Districrt, Province)
+            (full_name, nic, dob, gender, phone, email, address, blood_group, weight, last_donation_date, diseases, medicines, availability_status, Districrt, Province, nic_copy, profile_photo)
             VALUES 
-            ('$full_name', '$nic', " . ($dob ? "'$dob'" : "NULL") . ", '$gender', '$phone', '$email', '$address', '$blood_group', $weight, " . ($last_donation_date ? "'$last_donation_date'" : "NULL") . ", '$diseases', '$medicines', 'Available', '$district', '$province')";
+            ('$full_name', '$nic', " . ($dob ? "'$dob'" : "NULL") . ", '$gender', '$phone', '$email', '$address', '$blood_group', $weight, " . ($last_donation_date ? "'$last_donation_date'" : "NULL") . ", '$diseases', '$medicines', 'Available', '$district', '$province', '$nic_copy', '$profile_photo')";
 
     if($conn->query($sql)){
         header("Location: view_donors.php");
@@ -50,10 +72,11 @@ if(isset($_POST['save'])){
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Donor</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background: #f4f6f9; font-family: Arial, sans-serif; }
+        body { background: #31080c; font-family: Arial, sans-serif; }
         .card { border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: none; }
         h2 { color: #dc3545; font-weight: bold; }
         label { font-weight: 600; color: #495057; margin-bottom: 5px; }
@@ -69,7 +92,8 @@ if(isset($_POST['save'])){
                 <h2 class="text-center mb-4">🩸 Register New Blood Donor</h2>
                 <hr class="mb-4">
 
-                <form method="post">
+                <!-- 💡 වැදගත්: ෆයිල්ස් අප්ලෝඩ් කිරීමට enctype="multipart/form-data" ඇතුළත් කර ඇත -->
+                <form method="post" enctype="multipart/form-data">
                     
                     <div class="mb-3">
                         <label>Full Name</label>
@@ -124,7 +148,8 @@ if(isset($_POST['save'])){
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label>Province</label>
-                            <select name="province" class="form-select" required>
+                            <select name="province" id="province" class="form-select" required onchange="updateDistricts()">
+                                <option value="">Select Province</option>
                                 <option value="Western">Western Province</option>
                                 <option value="Southern">Southern Province</option>
                                 <option value="Central">Central Province</option>
@@ -138,7 +163,9 @@ if(isset($_POST['save'])){
                         </div>
                         <div class="col-md-6 mb-3">
                             <label>District</label>
-                            <input type="text" name="district" class="form-control" placeholder="Ex: Colombo / Matara" required>
+                            <select name="district" id="district" class="form-select" required>
+                                <option value="">Select District</option>
+                            </select>
                         </div>
                     </div>
 
@@ -161,11 +188,23 @@ if(isset($_POST['save'])){
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label>Any Medical Diseases?</label>
-                            <input type="text" name="diseases" class="form-control" placeholder="Ex: None / Diabetes" value="no">
+                            <input type="text" name="diseases" class="form-control" value="no">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label>Taking Any Long-term Medicines?</label>
-                            <input type="text" name="medicines" class="form-control" placeholder="Ex: None / Metformin" value="no">
+                            <input type="text" name="medicines" class="form-control" value="no">
+                        </div>
+                    </div>
+
+                    <!-- 💡 මෙන්න අලුතෙන් එකතු කල NIC සහ Profile Photo ලබා ගන්නා File Inputs දෙක -->
+                    <div class="row border-top pt-3 mt-3">
+                        <div class="col-md-6 mb-3">
+                            <label class="text-danger">📄 Upload NIC Copy (Image/PDF)</label>
+                            <input type="file" name="nic_copy" class="form-control" accept="image/*,application/pdf">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-danger">📸 Upload Profile Photo</label>
+                            <input type="file" name="profile_photo" class="form-control" accept="image/*">
                         </div>
                     </div>
 
@@ -179,6 +218,37 @@ if(isset($_POST['save'])){
         </div>
     </div>
 </div>
+
+<script>
+const districtsByProvince = {
+    "Western": ["Colombo", "Gampaha", "Kalutara"],
+    "Southern": ["Galle", "Matara", "Hambantota"],
+    "Central": ["Kandy", "Matale", "Nuwara Eliya"],
+    "Northern": ["Jaffna", "Kilinochchi", "Mannar", "Vavuniya", "Mullaitivu"],
+    "Eastern": ["Trincomalee", "Batticaloa", "Ampara"],
+    "North Western": ["Kurunegala", "Puttalam"],
+    "North Central": ["Anuradhapura", "Polonnaruwa"],
+    "Uva": ["Badulla", "Monaragala"],
+    "Sabaragamuwa": ["Ratnapura", "Kegalle"]
+};
+
+function updateDistricts() {
+    const provinceSelect = document.getElementById("province");
+    const districtSelect = document.getElementById("district");
+    const selectedProvince = provinceSelect.value;
+
+    districtSelect.innerHTML = '<option value="">Select District</option>';
+
+    if (selectedProvince && districtsByProvince[selectedProvince]) {
+        districtsByProvince[selectedProvince].forEach(district => {
+            const option = document.createElement("option");
+            option.value = district;
+            option.textContent = district;
+            districtSelect.appendChild(option);
+        });
+    }
+}
+</script>
 
 </body>
 </html>

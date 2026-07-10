@@ -20,7 +20,7 @@ $result = $conn->query("SELECT * FROM hospitals ORDER BY id DESC");
 <style>
 
 body{
-    background:#f4f6f9;
+    background:#31080c;
     font-family:Arial;
 }
 

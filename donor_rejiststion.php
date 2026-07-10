@@ -18,7 +18,6 @@ if($conn->connect_error){
 
 if(isset($_POST['register'])){
 
-    // real_escape_string භාවිතයෙන් ආරක්ෂාව වැඩි කර ඇත
     $full_name = $conn->real_escape_string($_POST['full_name']);
     $nic = $conn->real_escape_string($_POST['nic']);
     $dob = $conn->real_escape_string($_POST['dob']);
@@ -29,7 +28,6 @@ if(isset($_POST['register'])){
     $blood_group = $conn->real_escape_string($_POST['blood_group']);
     
     $Province = $conn->real_escape_string($_POST['Province']);
-    // 💡 HTML Form එකේ name="District" නිසා මෙතැන 'District' විය යුතුය
     $Districrt = $conn->real_escape_string($_POST['District']); 
     
     $weight = $conn->real_escape_string($_POST['weight']);
@@ -45,7 +43,6 @@ if(isset($_POST['register'])){
     $nic_tmp = $_FILES['nic_copy']['tmp_name'];
     $photo_tmp = $_FILES['profile_photo']['tmp_name'];
 
-    // CREATE FOLDERS IF NOT EXISTS
     if(!file_exists("uploads/nic")){
         mkdir("uploads/nic",0777,true);
     }
@@ -57,7 +54,7 @@ if(isset($_POST['register'])){
     move_uploaded_file($nic_tmp, "uploads/nic/".$nic_copy);
     move_uploaded_file($photo_tmp, "uploads/profile/".$profile_photo);
 
-    // INSERT QUERY (ඔබේ Database එකේ ඇති පරිදි Districrt ලෙසම තබා ඇත)
+    // INSERT QUERY
     $sql = "INSERT INTO donor (
         full_name, nic, dob, gender, phone, email, address, blood_group, 
         Province, Districrt, weight, last_donation_date, diseases, medicines, 
@@ -71,7 +68,7 @@ if(isset($_POST['register'])){
 
     if($conn->query($sql) === TRUE){
         
-        // 📧 දායකයා සාර්ථකව ඇතුළත් වූ පසු ඊමේල් පණිවිඩය යැවීමේ කොටස
+        // 📧 ඊමේල් පණිවිඩය යැවීමේ කොටස
         if(!empty($email)){
             $mail = new PHPMailer(true);
 
@@ -84,9 +81,7 @@ if(isset($_POST['register'])){
                 $mail->Password   = 'zmnrdbgsjxhvkqqk'; 
                 $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                 $mail->Port       = 587;
-                
-                // 💡 ගැටලුවක් වුවහොත් Error එක බලාගැනීමට debug mode එක 2 කරන්න (වැඩේ හරිගිය පසු 0 කරන්න)
-                $mail->SMTPDebug  = 0; 
+                $mail->CharSet    = 'UTF-8';
 
                 // Localhost SSL Error එක මඟහැරීමට
                 $mail->SMTPOptions = array(
@@ -98,14 +93,12 @@ if(isset($_POST['register'])){
                 );
 
                 // Recipients
-                // 💡 Gmail SMTP හරහා නිවැරදිව යෑමට මෙතැනටද ඔබේ සැබෑ Gmail ලිපිනයම දෙන්න
                 $mail->setFrom('sandarekaishani83@gmail.com', 'Blood Donation System');
-                // 💡 දායකයා Form එකේ ලියන ඊමේල් ලිපිනයට පණිවිඩය ස්වයංක්‍රීයව මෙතැනින් යොමු වේ
                 $mail->addAddress($email, $full_name); 
 
                 // Content
                 $mail->isHTML(true);
-                $mail->Subject = "=?UTF-8?B?".base64_encode("❤️ Thank You for Registering as a Blood Donor!")."?=";
+                $mail->Subject = "Thank You for Registering as a Blood Donor!";
                 
                 $mail->Body = "
                 <html>
@@ -123,7 +116,7 @@ if(isset($_POST['register'])){
                             <h4 style='color: #2c3e50; margin-top: 0; margin-bottom: 10px;'>📋 Your Registration Profile Details:</h4>
                             <p style='margin: 5px 0; font-size: 15px;'><strong>NIC Number:</strong> $nic</p>
                             <p style='margin: 5px 0; font-size: 15px;'><strong>Blood Group:</strong> <span style='color: #8e0000; font-weight: bold; font-size: 16px;'>$blood_group</span></p>
-                            <p style='margin: 5px 0; font-size: 15px;'><strong>District:</strong> $Districrt ($Province Province)</p>
+                            <p style='margin: 5px 0; font-size: 15px;'><strong>District:</strong> $Districrt ($Province)</p>
                             <p style='margin: 5px 0; font-size: 15px;'><strong>Current Status:</strong> <span style='color: #27ae60; font-weight: bold;'>$availability_status</span></p>
                         </div>
 
@@ -144,12 +137,11 @@ if(isset($_POST['register'])){
 
                 $mail->send();
             } catch (Exception $e) {
-                // ඊමේල් එකේ දෝෂයක් ආවොත් බලාගැනීමට අවශ්‍ය නම් පහත පේළිය active කරන්න:
-                // echo "Mail Error: " . $mail->ErrorInfo; exit();
+                // Error handle if needed
             }
         }
 
-        echo "<script>alert('🎉 Registration Successful! Welcome Email Sent.'); window.location.href='donor.php';</script>";
+        echo "<script>alert('🎉 Registration Successful! Welcome Email Sent.Please Check your email'); window.location.href='donor.php';</script>";
         exit();
     } else {
         echo "Error : " . $conn->error;
@@ -165,28 +157,12 @@ if(isset($_POST['register'])){
     <title>Donor Registration</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body{
-            background:#f4f6f9;
-            font-family: Arial, sans-serif;
-        }
-        .card{
-            border:none;
-            border-radius:20px;
-        }
-        .btn-danger{
-            padding:12px;
-            border-radius:10px;
-            font-weight:bold;
-        }
-        h2{
-            font-weight:bold;
-        }
-        label{
-            font-weight:600;
-        }
-        .form-control, .form-select{
-            border-radius:10px;
-        }
+        body{ background:#f4f6f9; font-family: Arial, sans-serif; }
+        .card{ border:none; border-radius:20px; }
+        .btn-danger{ padding:12px; border-radius:10px; font-weight:bold; }
+        h2{ font-weight:bold; }
+        label{ font-weight:600; }
+        .form-control, .form-select{ border-radius:10px; }
     </style>
 </head>
 <body>
@@ -257,22 +233,25 @@ if(isset($_POST['register'])){
                         </div>
                         <div class="col-md-4 mb-3">
                             <label>Province</label>
-                            <select name="Province" class="form-select">
+                            <!-- 💡 value ලේසි වෙන්න කෙටි කරන ලදී -->
+                            <select name="Province" id="provinceSelect" class="form-select" onchange="updateDistricts()" required>
                                 <option value="">Select Province</option>
-                                <option>Southern</option>
-                                <option>Central</option>
-                                <option>Eastern</option>
-                                <option>North Central</option>
-                                <option>Northern</option>
-                                <option>North Western</option>
-                                <option>Uva Province</option>
-                                <option>Sabaragamuwa Province</option>
-                                <option>Western Province</option>
+                                <option value="Western">Western Province</option>
+                                <option value="Southern">Southern Province</option>
+                                <option value="Central">Central Province</option>
+                                <option value="Eastern">Eastern Province</option>
+                                <option value="North Central">North Central Province</option>
+                                <option value="Northern">Northern Province</option>
+                                <option value="North Western">North Western Province</option>
+                                <option value="Uva">Uva Province</option>
+                                <option value="Sabaragamuwa">Sabaragamuwa Province</option>
                             </select>
                         </div>
                         <div class="col-md-4 mb-3">
                             <label>District</label>
-                            <input type="text" name="District" class="form-control">
+                            <select name="District" id="districtSelect" class="form-select" required>
+                                <option value="">Select District</option>
+                            </select>
                         </div>
                     </div>
 
@@ -326,6 +305,38 @@ if(isset($_POST['register'])){
         </div>
     </div>
 </div>
+
+<!-- 💡 නිවැරදි කරන ලද JavaScript කේතය -->
+<script>
+function updateDistricts() {
+    const provinceSelect = document.getElementById('provinceSelect');
+    const districtSelect = document.getElementById('districtSelect');
+    const selectedProvince = provinceSelect.value;
+
+    const districts = {
+        "Western": ["Colombo", "Gampaha", "Kalutara"],
+        "Southern": ["Galle", "Matara", "Hambantota"],
+        "Central": ["Kandy", "Matale", "Nuwara Eliya"],
+        "Eastern": ["Trincomalee", "Batticaloa", "Ampara"],
+        "North Central": ["Anuradhapura", "Polonnaruwa"],
+        "Northern": ["Jaffna", "Kilinochchi", "Mannar", "Mullaitivu", "Vavuniya"],
+        "North Western": ["Kurunegala", "Puttalam"],
+        "Uva": ["Badulla", "Monaragala"],
+        "Sabaragamuwa": ["Ratnapura", "Kegalle"]
+    };
+
+    districtSelect.innerHTML = '<option value="">Select District</option>';
+
+    if (selectedProvince && districts[selectedProvince]) {
+        districts[selectedProvince].forEach(function(district) {
+            const option = document.createElement('option');
+            option.value = district;
+            option.text = district;
+            districtSelect.appendChild(option);
+        });
+    }
+}
+</script>
 
 </body>
 </html>

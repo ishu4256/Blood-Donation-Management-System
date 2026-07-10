@@ -228,11 +228,13 @@ if(isset($_POST['search_blood_submit'])){
     </h1>
     <br> <hr>
     <br><br><br>
-    <h1>
+    <h3><br>
+            If you want to contact a Blood Donor, please click this button to search for a Blood Donor. <br><br>
         <button type="button" class="btn btn-light btn-lg fw-bold px-5 py-3 shadow" data-bs-toggle="modal" data-bs-target="#blood_searchModal">
             🩸 search blood Donor
+            
         </button>
-    </h1>
+    </h3>
 </div>
 
 <div class="modal fade" id="blood_searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">

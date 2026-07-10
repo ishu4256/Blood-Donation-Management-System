@@ -43,7 +43,7 @@ $result = $conn->query("SELECT * FROM contact_messages ORDER BY submitted_at DES
     
     <style>
         body {
-            background: #f4f6f9;
+            background:#31080c;
             font-family: Arial, sans-serif;
         }
         .topbar {

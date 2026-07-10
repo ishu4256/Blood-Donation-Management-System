@@ -29,18 +29,19 @@ $campaign_result = $conn->query($campaign_sql);
 
 <?php
 // Database එකෙන් රෝහල් ලැයිස්තුව ලබා ගැනීම
-$hospital_locations = "";
-$hospitals_query = "SELECT name, district FROM hospitals";
+$location_string = "";
+// රෝහලේ නම, ලිපිනය (location) සහ දිස්ත්‍රික්කය ලබා ගැනීම
+$hospitals_query = "SELECT name, location, district FROM hospitals";
 $hospitals_result = $conn->query($hospitals_query);
 
 if ($hospitals_result && $hospitals_result->num_rows > 0) {
     $locations_array = [];
     while($h_row = $hospitals_result->fetch_assoc()) {
-        // රෝහලේ නම සහ නගරය එකතු කිරීම (e.g., "General Hospital, Colombo")
-        $locations_array[] = $h_row['name'] . ", " . $h_row['district'];
+        // රෝහලේ නම සහ ලිපිනය එකතු කිරීම (e.g., "Teaching Hospital - Karapitiya, Karapitiya, Galle")
+        $locations_array[] = $h_row['name'] . ", " . $h_row['location'];
     }
-    // සිතියමේ සෙවීම සඳහා "රෝහල් නම + ලේ බැංකු" එකතු කර සකස් කිරීම
-    $location_string = urlencode(implode(" | ", $locations_array) . " | Blood Banks Sri Lanka");
+    // සියලුම රෝහල්වල නම් සහ ලිපින ' OR ' මඟින් වෙන් කර එකම සෙවුම් පදයක් (Query) ලෙස සිතියමට ලබා දීම
+    $location_string = urlencode(implode(" OR ", $locations_array));
 } else {
     // ඩේටාබේස් එකේ රෝහල් නැත්නම් Default ලෙස ලංකාවේ ලේ බැංකු පෙන්වයි
     $location_string = urlencode("Blood Bank Hospital Sri Lanka");
@@ -312,7 +313,7 @@ if (!isset($_SESSION['welcome_shown'])) {
 
     <hr>
 
-    <h1>Welcome To <br> Online Blood Donation System <br> Sri Lanka</h1>
+    <h1>Welcome To <br> Blood Donation Management System <br> Sri Lanka</h1>
     <p>Save Lives - Donate Blood</p>
     <br><br><br>
     <h1>

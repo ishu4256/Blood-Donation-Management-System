@@ -21,9 +21,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = mysqli_real_escape_string($conn, $_POST['email']);
     $phone = mysqli_real_escape_string($conn, $_POST['phone']);
     $area = mysqli_real_escape_string($conn, $_POST['area']);
-
+$preferred_area = $conn->real_escape_string($_POST['preferred_area']); // උදව් කළ හැකි ක්ෂේත්‍රය
     // 2. Data ටික 'volunteers' table එකට ඇතුළත් කිරීමේ SQL Query එක
-    $sql = "INSERT INTO volunteers (name, email, phone, area) VALUES ('$name', '$email', '$phone', '$area')";
+    $sql = "INSERT INTO volunteers (name, email, phone, area, preferred_area) VALUES ('$name', '$email', '$phone', '$area', '$preferred_area')";
 
     // Query එක සාර්ථකව ක්‍රියාත්මක වුනාදැයි බලන්න
     if ($conn->query($sql) === TRUE) {

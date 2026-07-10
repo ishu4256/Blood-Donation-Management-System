@@ -36,7 +36,7 @@ if (isset($_POST['submit_feedback'])) {
     <title>Submit Feedback</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #f4f6f9; font-family: Arial, sans-serif; }
+        body { background-color: #8e0000; font-family: Arial, sans-serif; }
         .feedback-card { max-width: 600px; margin: 60px auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
         .btn-custom { background-color: #8e0000; color: white; font-size: 18px; width: 140px; }
         .btn-custom:hover { background-color: #c0392b; color: white; }

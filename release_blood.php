@@ -15,7 +15,8 @@ $msg = "";
 $location_query = $conn->query("SELECT DISTINCT name FROM blood_stock ORDER BY name ASC");
 
 if (isset($_POST['blood_releases'])) {
-    $id = intval($_POST['id']);
+    // 💡 නිවැරදි කිරීම 1: $_POST['id'] වෙනුවට Form එකේ ඇති 'stock_id' නම භාවිත කිරීම
+    $id = isset($_POST['stock_id']) ? intval($_POST['stock_id']) : 0;
     $bags_to_release = intval($_POST['units']);
 
     if ($id > 0 && $bags_to_release > 0) {
@@ -32,7 +33,7 @@ if (isset($_POST['blood_releases'])) {
             // 2. ඉල්ලන ප්‍රමාණයට වඩා තොග තිබේදැයි බැලීම
             if ($current_units >= $bags_to_release) {
                 
-                // 🛑 DATABASE TRANSACTION START (ආරක්ෂිතව දත්ත වෙනස් කිරීමට)
+                // 🛑 DATABASE TRANSACTION START
                 $conn->begin_transaction();
 
                 try {
@@ -40,20 +41,13 @@ if (isset($_POST['blood_releases'])) {
                     $sql_update = "UPDATE blood_stock SET units = units - $bags_to_release WHERE id = $id";
                     $conn->query($sql_update);
 
-                    // B. නිදහස් කළ දත්ත වෙනම tracking table එකකට ඇතුළත් කිරීම (History එක සඳහා)
-                    // (හදිසියේ හෝ blood_releases table එක නැතත් error එකක් නොවී බේරීමට IF NOT EXISTS යොදා ඇත)
-                    $conn->query("CREATE TABLE IF NOT EXISTS blood_releases (
-                        id INT AUTO_INCREMENT PRIMARY KEY,
-                        stock_id INT,
-                        hospital_name VARCHAR(255),
-                        blood_group VARCHAR(10),
-                        units_released INT,
-                        released_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                    )");
+                    // B. 💡 නිවැරදි කිරීම 2: ඔබේ phpMyAdmin එකේ පවතින වගුවට (Table) ගැළපෙන සේ INSERT කිරීම.
+                    // පින්තූරයේ පෙනෙන පරිදි එහි ඇති columns වන්නේ: id, booking_id, patient_name, hospital_name, blood_group, units, released_at, address
+                    // මෙහි booking_id, patient_name, address සඳහා Default හෝ Null අගයන් යොදා ඇත.
                     
-                    $sql_insert = "INSERT INTO blood_releases (stock_id, hospital_name, blood_group, units_released) 
-                                   VALUES ($id, '$name', '$blood_group', $bags_to_release)";
-                    $conn->query($sql_insert);
+                $stmt = $conn->prepare("INSERT INTO blood_releases (booking_id, patient_name, hospital_name, blood_group, units, address) VALUES (0, 'Admin Released', ?, ?, ?, 'Direct Release')");
+$stmt->bind_param("ssi", $name, $blood_group, $bags_to_release);
+                    $stmt->execute();
 
                     $conn->commit(); // දත්ත ස්ථිර කිරීම
                     $msg = "<div class='alert alert-success fw-bold'>🎉 Successfully released $bags_to_release Units of $blood_group from $name! Stock updated automatically.</div>";
@@ -66,6 +60,8 @@ if (isset($_POST['blood_releases'])) {
             } else {
                 $msg = "<div class='alert alert-danger fw-bold'>⚠️ Insufficient Stock! Only ($current_units) units available for $blood_group at $name.</div>";
             }
+        } else {
+            $msg = "<div class='alert alert-danger'>Selected stock item not found.</div>";
         }
     } else {
         $msg = "<div class='alert alert-warning'>Please enter valid information.</div>";

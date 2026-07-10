@@ -15,28 +15,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $conn->real_escape_string($_POST['username']);
     $password = $conn->real_escape_string($_POST['password']);
 
-    $sql = "SELECT * FROM users WHERE username='$username' AND password='$password'";
+    // 💡 මෙහි USERNAME සහ PASSWORD යන දෙකටම BINARY එකතු කර ඇත.
+    $sql = "SELECT * FROM users WHERE BINARY username='$username' AND BINARY password='$password'";
     $result = $conn->query($sql);
 
     if ($result->num_rows > 0) {
 
-    $row = $result->fetch_assoc();
+        $row = $result->fetch_assoc();
 
-    $_SESSION['username'] = $row['username'];
-    $_SESSION['role'] = $row['role'];
+        $_SESSION['username'] = $row['username'];
+        $_SESSION['role'] = $row['role'];
 
-    if($row['role'] == 'admin'){
-        header("Location: admin_dashboard.php");
-        exit();
+        if($row['role'] == 'admin'){
+            header("Location: admin_dashboard.php");
+            exit();
+        }
+        else{
+            header("Location: Dashboard.php");
+            exit();
+        }
     }
     else{
-        header("Location: Dashboard.php");
-        exit();
+        $error = "Invalid Username or Password!";
     }
-}
-else{
-    $error = "Invalid Username or Password!";
-}
 }
 ?>
 
@@ -78,7 +79,7 @@ else{
             <a href="New Account1.php" class="link-btn">Create New Account</a>
             <br><br><br>
 <pre>
-            <input type="submit" value="LOGIN" class="btn login-btn">                          <a href="javascript:history.back()" class="btn btn-danger">Exit</a>
+            <input type="submit" value="LOGIN" class="btn login-btn">            <a href="javascript:history.back()" class="btn btn-danger">Exit</a>
 </pre>
 
         </form>

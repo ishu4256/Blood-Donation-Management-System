@@ -21,7 +21,7 @@ $result = $conn->query("SELECT * FROM hospitals");
 <style>
 
 body{
-    background:#f4f6f9;
+    background:#8e0000;
     font-family:Arial;
 }
 

@@ -32,7 +32,7 @@ if (!empty($province) && !empty($district) && !empty($blood_group)) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background: #f4f6f9;
+            background: #31080c;
             font-family: Arial;
         }
         .container-box {

@@ -1,29 +1,46 @@
 <?php
+// ඩේටාබේස් සම්බන්ධතාවය
 $conn = new mysqli("localhost", "root", "", "blood_donations");
 
-if($conn->connect_error){
+if($conn->connect_error) {
     die("Connection Failed : " . $conn->connect_error);
 }
 
+// 💡 1. AJAX ඉල්ලීමක් (Request) ආවොත් රෝහල් ලැයිස්තුව විතරක් Output කර එතනින් Script එක නතර (exit) කරන්න
+if (isset($_GET['blood_group_ajax'])) {
+    $blood_group = $conn->real_escape_string($_GET['blood_group_ajax']);
+
+    $query = "SELECT DISTINCT name FROM blood_stock WHERE blood_group = '$blood_group' AND units > 0 ORDER BY name ASC";
+    $result = $conn->query($query);
+
+    if ($result && $result->num_rows > 0) {
+        echo '<option value="" selected disabled>-- Select Hospital --</option>';
+        while ($row = $result->fetch_assoc()) {
+            echo '<option value="' . htmlspecialchars($row['name']) . '">' . htmlspecialchars($row['name']) . '</option>';
+        }
+    } else {
+        echo '<option value="">❌ No hospitals available for this blood group</option>';
+    }
+    $conn->close();
+    exit(); // 👈 වැදගත්: මුළු Form එකම ආයෙත් පල්ලෙහාට Render වෙන එක නවත්වන්න
+}
+
+// 💡 2. Form එක Submit කරපු වෙලාවට වැඩ කරන කොටස
 if(isset($_POST['submit'])){
     $name = $conn->real_escape_string($_POST['name']);
     $email = $conn->real_escape_string($_POST['email']);
     $phone = $conn->real_escape_string($_POST['phone']);
     $address = $conn->real_escape_string($_POST['address']);
     $blood_group = $conn->real_escape_string($_POST['blood_group']);
-        $description = $conn->real_escape_string($_POST['description']);
-
     $units = intval($_POST['units']);
     $hospital_name = $conn->real_escape_string($_POST['hospital_name']);
     $booking_date = $conn->real_escape_string($_POST['booking_date']);
 
-    // Backend Security: උපරිම සීමාව පරීක්ෂාව
     if ($units > 5) {
         echo "<script>alert('Error: You can request a maximum of 5 units.'); window.location.href='book_blood.php';</script>";
         exit();
     }
 
-    // දත්ත ඇතුළත් කිරීම (Default status එක 'Pending' වේ)
     $sql = "INSERT INTO blood_bookings (name, email, phone, address, blood_group, units, hospital_name, booking_date, status)
             VALUES ('$name', '$email', '$phone', '$address', '$blood_group', $units, '$hospital_name', '$booking_date', 'Pending')";
 
@@ -128,7 +145,8 @@ function fetchAvailableHospitals(bloodGroup) {
     }
 
     var xhr = new XMLHttpRequest();
-    xhr.open("GET", "get_hospitals.php?blood_group=" + encodeURIComponent(bloodGroup), true);
+    // 💡 3. වෙනම file එකකට යන්නේ නැතිව, මේ පිටුවටම (book_blood.php) Request එක එවීම
+    xhr.open("GET", "book_blood.php?blood_group_ajax=" + encodeURIComponent(bloodGroup), true);
     xhr.onload = function() {
         if (xhr.status === 200) {
             hospitalSelect.innerHTML = xhr.responseText;

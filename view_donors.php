@@ -25,6 +25,7 @@ $sql = "SELECT * FROM donor" . $where_clause . " ORDER BY donor_id DESC";
 $result = $conn->query($sql);
 ?>
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -33,21 +34,21 @@ $result = $conn->query($sql);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body{
-            background:#f4f6f9;
+            background:#31080c ;
             font-family:Arial, sans-serif;
         }
         .container-box{
             background:white;
             padding:25px;
             border-radius:10px;
-            box-shadow:0 0 10px #ccc;
+            box-shadow:0 0 10px #ca9797;
             margin-top:30px;
         }
         .table th { 
             background-color: #dc3545 !important; 
             color: white !important; 
             text-align: center;
-            white-space: nowrap; /* Column නම් කැඩී පහළට යාම වැළැක්වීමට */
+            white-space: nowrap; 
         }
         .profile-img {
             width: 50px;
@@ -57,17 +58,18 @@ $result = $conn->query($sql);
             border: 2px solid #dee2e6;
         }
         td {
-            white-space: nowrap; /* දත්ත තනි පේළියට ලස්සනට තබා ගැනීමට */
+            white-space: nowrap; 
         }
         .text-wrap-custom {
-            white-space: normal !important; /* ලිපිනය වැනි දිගු දත්ත අවශ්‍ය පරිදි කැඩී පෙනීමට */
+            white-space: normal !important; 
             min-width: 200px;
         }
     </style>
 </head>
 <body>
 
-<div class="container-fluid px-5 mb-5"> <div class="container-box">
+<div class="container-fluid px-5 mb-5"> 
+    <div class="container-box">
 
         <h2 class="text-center text-danger mb-4">
             Registered Donors Comprehensive List
@@ -94,10 +96,12 @@ $result = $conn->query($sql);
         </div>
 
         <div class="table-responsive">
-            <table class="table table-bordered table-striped align-middle small"> <thead>
+            <table class="table table-bordered table-striped align-middle small"> 
+                <thead>
                     <tr class="table-danger">
                         <th>ID</th>
                         <th>Photo</th>
+                        <th>NIC Copy</th>
                         <th>Name</th>
                         <th>NIC</th>
                         <th>DOB</th>
@@ -124,10 +128,43 @@ $result = $conn->query($sql);
                             $status = $row['availability_status'];
                             $badge_class = (strcasecmp($status, 'Available') == 0) ? 'bg-success' : 'bg-danger';
                             
-                            // Profile photo එකක් නොතිබුනහොත් Default පින්තූරයක් පෙන්වීමට
-                            $photo_path = !empty($row['profile_photo']) ? "uploads/profile/" . $row['profile_photo'] : "uploads/profile/default.png";
+                            // 📁 Profile Photo Path
+                            $final_photo_path = "";
+                            if (!empty($row['profile_photo'])) {
+                                $photo_name = $row['profile_photo'];
+                                if (file_exists("uploads/" . $photo_name)) {
+                                    $final_photo_path = "uploads/" . $photo_name;
+                                } elseif (file_exists("uploads/profile/" . $photo_name)) {
+                                    $final_photo_path = "uploads/profile/" . $photo_name;
+                                } elseif (file_exists($photo_name)) {
+                                    $final_photo_path = $photo_name;
+                                } else {
+                                    $final_photo_path = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"; 
+                                }
+                            } else {
+                                $final_photo_path = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+                            }
+
+                            // 📁 NIC Copy Path Logic (පැරණි ක්‍රම සියල්ලම පරීක්ෂා කරයි)
+                            $final_nic_path = "";
+                            if (!empty($row['nic_copy'])) {
+                                $nic_name = $row['nic_copy'];
+                                
+                                if (file_exists("uploads/" . $nic_name)) {
+                                    $final_nic_path = "uploads/" . $nic_name;
+                                    
+                                } elseif (file_exists($nic_name)) {
+                                    $final_nic_path = $nic_name;
+                                    
+                                } elseif (file_exists("uploads/nic/" . $nic_name)) {
+                                    $final_nic_path = "uploads/nic/" . $nic_name;
+                                    
+                                } else {
+                                    // කේතයෙන් file එක කෙලින්ම නැතත් database එකේ නමක් තිබේ නම් uploads/ එකෙන් උත්සාහ කරයි
+                                    $final_nic_path = "uploads/" . $nic_name;
+                                }
+                            }
                             
-                            // හිස් අගයන් (NULL) තිබේ නම් ඒවා වෙනුවට "N/A" ලෙස පෙන්වීමට
                             $dob = !empty($row['dob']) && $row['dob'] != '0000-00-00' ? $row['dob'] : 'N/A';
                             $gender = !empty($row['gender']) ? $row['gender'] : 'N/A';
                             $weight = !empty($row['weight']) && $row['weight'] > 0 ? $row['weight'] . " kg" : 'N/A';
@@ -136,13 +173,27 @@ $result = $conn->query($sql);
                             $medicines = !empty($row['medicines']) ? $row['medicines'] : 'None';
                             $address = !empty($row['address']) ? $row['address'] : 'N/A';
                             $province = !empty($row['Province']) ? ucwords($row['Province']) : 'N/A';
-                            $district = !empty($row['Districrt']) ? ucwords($row['Districrt']) : 'N/A'; // Database එකේ අක්ෂර වින්‍යාසය (Districrt) අනුව නිවැරදි කර ඇත
+                            $district = !empty($row['Districrt']) ? ucwords($row['Districrt']) : 'N/A'; 
                     ?>
                     <tr>
                         <td class="text-center"><?php echo $row['donor_id']; ?></td>
+                        
+                        <!-- Profile Photo -->
                         <td class="text-center">
-                            <img src="<?php echo $photo_path; ?>" class="profile-img" alt="Donor">
+                            <img src="<?php echo $final_photo_path; ?>" class="profile-img" alt="Profile">
                         </td>
+
+                        <!-- NIC Copy (සකස් කරන ලද කොටස) -->
+                        <td class="text-center">
+                            <?php if (!empty($row['nic_copy'])): ?>
+                                <a href="<?php echo $final_nic_path; ?>" target="_blank" class="btn btn-outline-primary btn-sm px-2 fw-bold" style="font-size: 11px;">
+                                    👁️ View Document
+                                </a>
+                            <?php else: ?>
+                                <span class="text-muted small">No File</span>
+                            <?php endif; ?>
+                        </td>
+
                         <td><strong><?php echo htmlspecialchars($row['full_name']); ?></strong></td>
                         <td><?php echo htmlspecialchars($row['nic']); ?></td>
                         <td class="text-center"><?php echo htmlspecialchars($dob); ?></td>
@@ -176,7 +227,7 @@ $result = $conn->query($sql);
                     <?php 
                         } 
                     } else {
-                        echo "<tr><td colspan='18' class='text-center text-muted py-4'>❌ No Donors found for the selected filter criteria.</td></tr>";
+                        echo "<tr><td colspan='19' class='text-center text-muted py-4'>❌ No Donors found for the selected filter criteria.</td></tr>";
                     }
                     ?>
                 </tbody>
@@ -190,7 +241,6 @@ $result = $conn->query($sql);
         </div>
 
     </div>
-
 </div>
 
 </body>

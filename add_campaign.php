@@ -17,20 +17,21 @@ if(isset($_POST['submit'])){
     $title = $conn->real_escape_string($_POST['title']);
     $organizer = $conn->real_escape_string($_POST['organizer']);
     $location = $conn->real_escape_string($_POST['location']);
+    $district = $conn->real_escape_string($_POST['district']);
     $campaign_date = $conn->real_escape_string($_POST['campaign_date']);
     $start_time = $conn->real_escape_string($_POST['start_time']);
     $end_time = $conn->real_escape_string($_POST['end_time']);
     $description = $conn->real_escape_string($_POST['description']);
 
     //  'campaigns'  Table add the data 
-    $sql = "INSERT INTO campaigns (title, organizer, location, campaign_date, start_time, end_time, description)
-            VALUES ('$title', '$organizer', '$location', '$campaign_date', '$start_time', '$end_time', '$description')";
+    $sql = "INSERT INTO campaigns (title, organizer, location, district, campaign_date, start_time, end_time, description)
+            VALUES ('$title', '$organizer', '$location', '$district', '$campaign_date', '$start_time', '$end_time', '$description')";
 
     if($conn->query($sql) === TRUE){
         $message = "🎉 Campaign Added Successfully!";
         $message_class = "alert-success";
         
-        // අවශ්‍ය නම් දත්ත ඇතුළත් වූ සැණින් වෙනත් පිටුවකට (ဥද: view_campaigns.php) Redirect කළ හැක:
+        // අවශ්‍ය නම් දත්ත ඇතුළත් වූ සැණින් වෙනත් පිටුවකට (ශික්ෂා: view_campaigns.php) Redirect කළ හැක:
         // header("Location: view_campaigns.php");
         // exit();
     }else{
@@ -51,7 +52,7 @@ if(isset($_POST['submit'])){
     
     <style>
         body {
-            background: #f4f6f9;
+            background: #31080c;
             font-family: Arial, sans-serif;
         }
         .topbar {
@@ -82,7 +83,11 @@ if(isset($_POST['submit'])){
 </head>
 
 <body>
-
+    
+<br><br><br>
+<center>
+                <a href="admin_dashboard.php" class="btn btn-secondary">Back</a>
+</center>
 
 <div class="container mb-5 d-flex justify-content-center">
     <div class="container-box w-100">
@@ -112,6 +117,37 @@ if(isset($_POST['submit'])){
                 <label class="form-label fw-semibold">Location / Venue (ස්ථානය)</label>
                 <input type="text" name="location" class="form-control" placeholder="Eg: Community Hall, Matara" required>
             </div>
+            <div class="mb-3">
+                <label class="form-label fw-semibold">District (දිස්ත්‍රික්කය)</label>
+                <select name="district" class="form-select" required>
+                    <option value="">Select District</option>
+                    <option value="Colombo">Colombo</option>
+                    <option value="Gampaha">Gampaha</option>
+                    <option value="Kalutara">Kalutara</option>
+                    <option value="Kandy">Kandy</option>
+                    <option value="Matale">Matale</option>
+                    <option value="Nuwara Eliya">Nuwara Eliya</option>
+                    <option value="Galle">Galle</option>
+                    <option value="Matara">Matara</option>
+                    <option value="Hambantota">Hambantota</option>
+                    <option value="Jaffna">Jaffna</option>
+                    <option value="Kilinochchi">Kilinochchi</option>
+                    <option value="Mannar">Mannar</option>
+                    <option value="Vavuniya">Vavuniya</option>
+                    <option value="Mullaitivu">Mullaitivu</option>
+                    <option value="Batticaloa">Batticaloa</option>
+                    <option value="Ampara">Ampara</option>
+                    <option value="Trincomalee">Trincomalee</option>
+                    <option value="Kurunegala">Kurunegala</option>
+                    <option value="Puttalam">Puttalam</option>
+                    <option value="Anuradhapura">Anuradhapura</option>
+                    <option value="Polonnaruwa">Polonnaruwa</option>
+                    <option value="Badulla">Badulla</option>
+                    <option value="Monaragala">Monaragala</option>
+                    <option value="Ratnapura">Ratnapura</option>
+                    <option value="Kegalle">Kegalle</option>
+                </select>
+            </div>
 
             <div class="row">
                 <div class="col-md-4 mb-3">
@@ -136,10 +172,11 @@ if(isset($_POST['submit'])){
             <button type="submit" name="submit" class="btn btn-danger w-100 py-2 fw-bold" style="background-color: #8e0000; border: none;">
                 📢 Publish Campaign
             </button>
-                                <a href="javascript:history.back()" class="btn btn-secondary w-100">Exit</a>
 
         </form>
     </div>
+    <br>
+
 </div>
 
 
