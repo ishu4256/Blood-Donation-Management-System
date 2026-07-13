@@ -151,28 +151,27 @@
 
         .hero-section { border: 1px solid #ddd; padding: 30px; border-radius: 8px; max-width: 500px; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         
-        /* Join Now Button එක */
+        /* Join Now Button  */
         .btn-join { background-color: #28a745; color: white; padding: 12px 24px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; text-decoration: none; display: inline-block; font-weight: bold; }
         .btn-join:hover { background-color: #218838; }
 
-        /* Background එක අඳුරු කරන කොටස (Modal Overlay) */
         .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
 
-        /* මැදින් එන Popup Box එක (Modal Content) */
+        /*  Popup Box  (Modal Content) */
         .modal-content { background-color: white; padding: 25px; border-radius: 10px; width: 100%; max-width: 450px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); animation: fadeIn 0.3s ease-in-out; position: relative; }
 
-        /* Popup එක Close කරන (X) ලකුණ */
+        /* Popup  Close karana (X)  */
         .close-btn { position: absolute; right: 20px; top: 15px; font-size: 28px; font-weight: bold; color: #aaa; cursor: pointer; }
         .close-btn:hover { color: black; }
 
-        /* Form එක ඇතුලේ Styling */
+        /* Form  Styling */
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
         input[type="text"], input[type="email"], input[type="tel"], select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
         .btn-submit { background-color: #007bff; color: white; padding: 12px 15px; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-size: 16px; font-weight: bold; }
         .btn-submit:hover { background-color: #0069d9; }
 
-        /* Popup එක ලස්සනට පාවෙලා එන්න Animation එකක් */
+        /* Popup  Animation එකක් */
         @keyframes fadeIn {
             from { opacity: 0; transform: scale(0.9); }
             to { opacity: 1; transform: scale(1); }
@@ -262,17 +261,17 @@
     <script>
         var modal = document.getElementById("volunteerModal");
 
-        // Popup එක පෙන්වන්න
+        // Popup ek pennna
         function openModal() {
             modal.style.display = "flex";
         }
 
-        // Popup එක වහන්න
+        // Popup eka ain karanna
         function closeModal() {
             modal.style.display = "none";
         }
 
-        // Popup එකෙන් පිටත කළු පාට Area එක ක්ලික් කරත් Popup එක වැහෙනවා
+        // Popup  Area eliye kalupata than click karama Popup ain wenawa
         window.onclick = function(event) {
             if (event.target == modal) {
                 modal.style.display = "none";

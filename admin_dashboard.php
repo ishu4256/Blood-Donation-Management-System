@@ -17,7 +17,7 @@ if($conn->connect_error){
     die("Connection Failed : " . $conn->connect_error);
 }
 
-// Counts
+// Counts ganna eka
 $donors = $conn->query("SELECT COUNT(*) AS total FROM donor")->fetch_assoc()['total'];
 $hospitals = $conn->query("SELECT COUNT(*) AS total FROM hospitals")->fetch_assoc()['total'];
 $bookings = $conn->query("SELECT COUNT(*) AS total FROM blood_bookings")->fetch_assoc()['total'];
@@ -43,7 +43,6 @@ window.onload = function(){
 
     <style>
         body {
-            /* 💡 Background එක කැපිලා පේන්න Overlay එක සකස් කළා */
             background-image: linear-gradient(rgba(9, 11, 15, 0.75), rgba(30, 35, 41, 0.85)), url('images/bc.jpeg');
             background-size: cover;
             background-position: center;
@@ -69,7 +68,6 @@ window.onload = function(){
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
 
-        /* 💡 සුදු පාට බොක්ස් වල පැහැදිලි බව වැඩි දියුණු කිරීම */
         .action-box {
             background: #ffffff;
             padding: 25px;
@@ -85,7 +83,7 @@ window.onload = function(){
             margin-bottom: 20px;
         }
 
-        /* 💡 උඩ තියෙන සංඛ්‍යා පෙන්වන බොක්ස් වල පෙනුම */
+        /* uda ilakkam box wala penuma */
         .card-box {
             color: white;
             border-radius: 12px;
@@ -115,14 +113,13 @@ window.onload = function(){
             opacity: 0.9;
         }
 
-        /* 💡 Vibrant Colors */
+        /*  Vibrant Colors */
         .bg-red { background: #de3545; }
         .bg-blue { background: #0066cc; }
         .bg-orange { background: #f97316; }
         .bg-purple { background: #7c3aed; }
         .bg-magenta { background: #db2777; }
 
-        /* Form styling */
         .form-control, .form-select {
             border-radius: 8px;
             padding: 10px 15px;
@@ -176,7 +173,6 @@ window.onload = function(){
 
     <h1 class="dashboard-title">ADMIN DASHBOARD</h1>
 
-    <!-- 💡 Counts Row (සියල්ල එකම මට්ටමකට සකස් කරන ලදී) -->
     <div class="row g-3 mb-5">
         <div class="col-md-4 col-sm-6">
             <div class="card-box bg-red">

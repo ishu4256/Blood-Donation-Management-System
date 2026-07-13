@@ -1,28 +1,23 @@
 <?php
-// Database එකට සම්බන්ධ වීමේ විස්තර
 $servername = "localhost";
-$username = "root";       // ඔබේ Database username එක
-$password = "";           // ඔබේ Database password එක
-$dbname = "blood_donations"; // ඔබේ Database නම
+$username = "root";       
+$password = "";           
+$dbname = "blood_donations"; 
 
-// Connection එක සාදා ගැනීම
 $conn = new mysqli($servername, $username, $password, $dbname);
 
-// සම්බන්ධතාවය පරීක්ෂා කිරීම
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// 1. Contact Message Form එක submit කර ඇති දැයි පරීක්ෂා කිරීම
+//  Contact Message Form submission logic
 if (isset($_POST['submit_message'])) {
     
-    // ලැබෙන දත්ත ආරක්ෂිතව ලබා ගැනීම (SQL Injection වලින් ආරක්ෂා වීමට)
     $full_name = $conn->real_escape_string($_POST['full_name']);
     $email = $conn->real_escape_string($_POST['email']);
     $subject = $conn->real_escape_string($_POST['subject']);
     $message = $conn->real_escape_string($_POST['message']);
 
-    // දත්ත ඇතුළත් කිරීමේ SQL Query එක
     $sql = "INSERT INTO contact_messages (full_name, email, subject, message) 
             VALUES ('$full_name', '$email', '$subject', '$message')";
 
@@ -34,17 +29,14 @@ if (isset($_POST['submit_message'])) {
     }
 }
 
-// 2. Modal Form එක හරහා Blood Request එකක් ආ විට එය 'blood_bookings' table එකට ඇතුළත් කිරීම
+// blood request ekk awama blood boking ekata yanna
 if (isset($_POST['add_request'])) {
     $patient_name  = $conn->real_escape_string($_POST['patient_name']);
     $blood_group   = $conn->real_escape_string($_POST['blood_group']);
     $hospital_name = $conn->real_escape_string($_POST['hospital_name']);
     $required_date = $conn->real_escape_string($_POST['date']);
 
-    /* 💡 නිවැරදි කිරීම 1: 
-       'requests' වෙනුවට 'blood_bookings' ලෙස වගු නාමය සහ 
-       ඊට අදාළ තීරු නාමයන් (name, booking_date) නිවැරදි කර ඇත.
-    */
+   
     $sql_request = "INSERT INTO blood_bookings (name, blood_group, hospital_name, booking_date, status) 
                     VALUES ('$patient_name', '$blood_group', '$hospital_name', '$required_date', 'Pending')";
 
@@ -56,9 +48,8 @@ if (isset($_POST['add_request'])) {
     }
 }
 
-/* 💡 නිවැරදි කිරීම 2: 
-   'requests' වෙනුවට 'blood_bookings' වගුවෙන් දත්ත කියවීමට සකස් කර ඇත.
-*/
+
+
 $query = "SELECT * FROM blood_bookings ORDER BY id DESC";
 $result = $conn->query($query);
 ?>
@@ -308,6 +299,5 @@ $result = $conn->query($query);
 </html>
 
 <?php 
-// Connection එක වසා දැමීම
 $conn->close();
 ?>

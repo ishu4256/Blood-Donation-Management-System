@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-// Admin කෙනෙක්දැයි පරීක්ෂා කිරීම
 if(!isset($_SESSION['username'])){
     header("Location: login.php");
     exit();
@@ -11,14 +10,13 @@ if($_SESSION['role'] != 'admin'){
     exit();
 }
 
-// Database සම්බන්ධතාවය (ඔබේ කේතයේ ඇති නමම භාවිත කර ඇත)
 $conn = new mysqli("localhost", "root", "", "blood_donations");
 
 if($conn->connect_error){
     die("Connection Failed : " . $conn->connect_error);
 }
 
-// පණිවිඩයක් Read ලෙස සලකුණු කිරීමේ ක්‍රියාවලිය (Update Status)
+// Update Status
 if(isset($_GET['mark_read_id'])){
     $msg_id = intval($_GET['mark_read_id']);
     $update_query = "UPDATE contact_messages SET status = 'Read' WHERE id = $msg_id";
@@ -28,7 +26,7 @@ if(isset($_GET['mark_read_id'])){
     }
 }
 
-// සියලුම පණිවිඩ අලුත්ම ඒවා මුලට එන සේ ලබා ගැනීම (Latest First)
+// all massages come Latest First
 $result = $conn->query("SELECT * FROM contact_messages ORDER BY submitted_at DESC");
 ?>
 
@@ -120,7 +118,7 @@ $result = $conn->query("SELECT * FROM contact_messages ORDER BY submitted_at DES
                     <?php 
                     if($result && $result->num_rows > 0) {
                         while($row = $result->fetch_assoc()) { 
-                            // Status එක අනුව වෙනස් පැහැති බැජ් ලබාදීම
+                            // Status ek anuwa colors dena eka
                             $status_badge = ($row['status'] == 'Read') ? 'badge-read' : 'badge-unread';
                     ?>
                     <tr>

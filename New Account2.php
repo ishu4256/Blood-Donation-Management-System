@@ -8,7 +8,6 @@ if($conn->connect_error){
 
 $error = "";
 
-// පළමු පියවර සම්පූර්ණ කර නැත්නම් ආපසු හැරවීම
 if (!isset($_SESSION['reg_name'])) {
     header("Location: New Account1.php");
     exit();
@@ -20,7 +19,7 @@ if(isset($_POST['submit'])){
     $confirm_password = $conn->real_escape_string($_POST['confirm_password']);
 
     if($password == $confirm_password){
-        // Username එක දැනටමත් තියෙනවද බැලීම
+        // Username ek already thiyanawada kiyala check karana eka
         $checkUser = "SELECT * FROM users WHERE username='$username'";
         $result = $conn->query($checkUser);
 
@@ -28,7 +27,6 @@ if(isset($_POST['submit'])){
             $error = "Username already exists!";
         } else {
             
-            // Session එකෙන් පළමු පිටුවේ දත්ත ලබා ගැනීම
             $name = $_SESSION['reg_name'];
             $full_name = $_SESSION['reg_full_name'];
             $address = $_SESSION['reg_address'];
@@ -42,7 +40,6 @@ if(isset($_POST['submit'])){
             $district = $_SESSION['reg_district'];
             $blood_group = $_SESSION['reg_blood_group'];
 
-            // 1. මුලින්ම donor_details එකට දත්ත දැමීම
             $sql_details = "INSERT INTO donor_details 
                     (name, full_name, address, contact_no, email, nic, date_of_birth, sex, country, province, district, blood_group) 
                     VALUES 
@@ -50,14 +47,14 @@ if(isset($_POST['submit'])){
 
             if($conn->query($sql_details) === TRUE){
                 
-                // 💡 2. ස්වයංක්‍රීයව හැදුණු අලුත්ම ID එක ලබා ගැනීම
+                // automaticaly ID ek ganima
                 $new_donor_id = $conn->insert_id;
 
-                // 3. එම ලබාගත් ID එකම යොදාගෙන users ටේබල් එකට දත්ත දැමීම
+                // e ID eken users table ekata data daminna
                 $sql_users = "INSERT INTO users (donor_id, username, password, role) VALUES ($new_donor_id, '$username', '$password', 'user')";
 
                 if($conn->query($sql_users) === TRUE){
-                    // වැඩේ සාර්ථකයි නම් Session දත්ත මකා දැමීම
+                    // wade sarthakainm Sessioneke data makima
                     session_unset();
                     session_destroy();
                     

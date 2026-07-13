@@ -8,10 +8,6 @@ if(!isset($_SESSION['username']) || $_SESSION['role'] != 'admin'){
 $conn = new mysqli("localhost", "root", "", "blood_donations");
 if($conn->connect_error) { die("Connection Failed : " . $conn->connect_error); }
 
-/* 💡 නිවැရදි කිරීම:
-   collected_date එකට දින 42ක් එකතු කර, එය අද දිනය සමඟ සසඳා 
-   ඉතිරි දින ගණන (days_remaining) ගණනය කරනු ලබයි.
-*/
 $sql = "SELECT *, 
         DATEDIFF(DATE_ADD(collected_date, INTERVAL 42 DAY), CURDATE()) AS days_remaining 
         FROM blood_stock 
@@ -62,11 +58,12 @@ $result = $conn->query($sql);
                 while($row = $result->fetch_assoc()) {
                     
                     $collected = $row['collected_date'];
-                    // දින 42 එකතු කර Expiry Date එක සාදා ගැනීම
+
+                    // expiry date calculation (collected date + 42 days)
                     $expiry = date('Y-m-d', strtotime($collected . ' + 42 days')); 
                     $days_left = $row['days_remaining'];
 
-                    // තත්ත්වය සහ වර්ණ තීරණය කිරීම (Status and Color Logic)
+                    // Status and Color Logic
                     if ($days_left < 0) {
                         $status_badge = "<span class='badge bg-danger d-block py-2 fs-6'>❌ Expired</span>";
                         $expiry_text = "<span class='text-danger fw-bold'>$expiry</span>";

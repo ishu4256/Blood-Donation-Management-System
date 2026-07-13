@@ -1,12 +1,11 @@
 <?php
-// ඩේටාබේස් සම්බන්ධතාවය
 $conn = new mysqli("localhost", "root", "", "blood_donations");
 
 if($conn->connect_error) {
     die("Connection Failed : " . $conn->connect_error);
 }
 
-// 💡 1. AJAX ඉල්ලීමක් (Request) ආවොත් රෝහල් ලැයිස්තුව විතරක් Output කර එතනින් Script එක නතර (exit) කරන්න
+// request ekak awoth ekata answer ekak danna
 if (isset($_GET['blood_group_ajax'])) {
     $blood_group = $conn->real_escape_string($_GET['blood_group_ajax']);
 
@@ -22,10 +21,10 @@ if (isset($_GET['blood_group_ajax'])) {
         echo '<option value="">❌ No hospitals available for this blood group</option>';
     }
     $conn->close();
-    exit(); // 👈 වැදගත්: මුළු Form එකම ආයෙත් පල්ලෙහාට Render වෙන එක නවත්වන්න
+    exit(); // form eka pahalata scroll wenna eka nawaththanna
 }
 
-// 💡 2. Form එක Submit කරපු වෙලාවට වැඩ කරන කොටස
+
 if(isset($_POST['submit'])){
     $name = $conn->real_escape_string($_POST['name']);
     $email = $conn->real_escape_string($_POST['email']);
@@ -145,7 +144,7 @@ function fetchAvailableHospitals(bloodGroup) {
     }
 
     var xhr = new XMLHttpRequest();
-    // 💡 3. වෙනම file එකකට යන්නේ නැතිව, මේ පිටුවටම (book_blood.php) Request එක එවීම
+    // me pitiwatama blood group ekata hospital list eka ganna request ekak yawanna.wena pituwakata yannathuwa
     xhr.open("GET", "book_blood.php?blood_group_ajax=" + encodeURIComponent(bloodGroup), true);
     xhr.onload = function() {
         if (xhr.status === 200) {

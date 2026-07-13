@@ -13,8 +13,8 @@ $searched_group = "";
 if(isset($_POST['search_blood'])){
     $searched_group = $conn->real_escape_string($_POST['blood_group']);
     
-    // Obage database eke donors table eken lē vargaya thiyenawada bælīma
-    // (Satahana: Donors table eke column names 'blood_group' saha 'status' lesa æthi bava upakalpanaya kara ætha)
+    
+    // donorslata adala blood group ek ganima saha status eka "Available" una donorsla ganna query ekak
     $search_query = "SELECT * FROM donors WHERE blood_group = '$searched_group' AND status = 'Available'";
     $search_result = $conn->query($search_query);
 }

@@ -4,6 +4,7 @@ $conn = new mysqli("localhost","root","","blood_donations");
 
 if(isset($_POST['save'])){
 
+// Get the form data and sanitize it
 $name = $_POST['name'];
 $location = $_POST['location'];
 $contact = $_POST['contact'];
@@ -13,6 +14,8 @@ $contact = $_POST['contact'];
 $conn->query("INSERT INTO hospitals(name,location,contact,province,district)
 VALUES('$name','$location','$contact','$province','$district')");
 
+
+// Redirect to view_hospitals.php after successful insertion
 header("Location:view_hospitals.php");
 }
 ?>

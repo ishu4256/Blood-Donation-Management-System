@@ -1,6 +1,5 @@
 <?php
 session_start();
-// Admin කෙනෙක්දැයි පරීක්ෂා කිරීම
 if(!isset($_SESSION['username']) || $_SESSION['role'] != 'admin'){
     header("Location: login.php");
     exit();
@@ -11,17 +10,15 @@ if($conn->connect_error) { die("Connection Failed : " . $conn->connect_error); }
 
 $msg = "";
 
-// ඩේටාබේස් එකේ දැනට ලේ තොග ඇති රෝහල්/ස්ථාන ලැයිස්තුව ලබා ගැනීම
 $location_query = $conn->query("SELECT DISTINCT name FROM blood_stock ORDER BY name ASC");
 
 if (isset($_POST['blood_releases'])) {
-    // 💡 නිවැරදි කිරීම 1: $_POST['id'] වෙනුවට Form එකේ ඇති 'stock_id' නම භාවිත කිරීම
     $id = isset($_POST['stock_id']) ? intval($_POST['stock_id']) : 0;
     $bags_to_release = intval($_POST['units']);
 
     if ($id > 0 && $bags_to_release > 0) {
         
-        // 1. තෝරාගත් Record එකේ දැනට පවතින තොගය සහ විස්තර පරීක්ෂා කිරීම
+        // slected Record eke thiyana thoga saha visthara balana eka
         $check_stock = $conn->query("SELECT units, blood_group, name FROM blood_stock WHERE id = $id");
         $stock_row = $check_stock->fetch_assoc();
         
@@ -30,30 +27,28 @@ if (isset($_POST['blood_releases'])) {
             $blood_group = $stock_row['blood_group'];
             $name = $stock_row['name'];
 
-            // 2. ඉල්ලන ප්‍රමාණයට වඩා තොග තිබේදැයි බැලීම
+            // illana ganata wada stock ek thiyada balana ek
             if ($current_units >= $bags_to_release) {
                 
                 // 🛑 DATABASE TRANSACTION START
                 $conn->begin_transaction();
 
                 try {
-                    // A. ලේ තොගය ස්වයංක්‍රීයව අඩු කිරීම (UPDATE Query)
+                    // (UPDATE Query)
                     $sql_update = "UPDATE blood_stock SET units = units - $bags_to_release WHERE id = $id";
                     $conn->query($sql_update);
 
-                    // B. 💡 නිවැරදි කිරීම 2: ඔබේ phpMyAdmin එකේ පවතින වගුවට (Table) ගැළපෙන සේ INSERT කිරීම.
-                    // පින්තූරයේ පෙනෙන පරිදි එහි ඇති columns වන්නේ: id, booking_id, patient_name, hospital_name, blood_group, units, released_at, address
-                    // මෙහි booking_id, patient_name, address සඳහා Default හෝ Null අගයන් යොදා ඇත.
+                   
                     
                 $stmt = $conn->prepare("INSERT INTO blood_releases (booking_id, patient_name, hospital_name, blood_group, units, address) VALUES (0, 'Admin Released', ?, ?, ?, 'Direct Release')");
 $stmt->bind_param("ssi", $name, $blood_group, $bags_to_release);
                     $stmt->execute();
 
-                    $conn->commit(); // දත්ත ස්ථිර කිරීම
+                    $conn->commit(); // data confirm karanna
                     $msg = "<div class='alert alert-success fw-bold'>🎉 Successfully released $bags_to_release Units of $blood_group from $name! Stock updated automatically.</div>";
                     
                 } catch (Exception $e) {
-                    $conn->rollback(); // ගැටලුවක් වුවහොත් වෙනස්කම් අවලංගු කිරීම
+                    $conn->rollback(); // wenaskam awalangu karanna
                     $msg = "<div class='alert alert-danger'>❌ Error updating stock: " . $e->getMessage() . "</div>";
                 }
 

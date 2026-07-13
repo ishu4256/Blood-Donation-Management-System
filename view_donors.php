@@ -20,7 +20,6 @@ if (isset($_GET['status_filter']) && $_GET['status_filter'] !== "") {
     $where_clause = " WHERE availability_status = '$filter_status'";
 }
 
-// Query එක සකස් කිරීම
 $sql = "SELECT * FROM donor" . $where_clause . " ORDER BY donor_id DESC";
 $result = $conn->query($sql);
 ?>
@@ -128,7 +127,7 @@ $result = $conn->query($sql);
                             $status = $row['availability_status'];
                             $badge_class = (strcasecmp($status, 'Available') == 0) ? 'bg-success' : 'bg-danger';
                             
-                            // 📁 Profile Photo Path
+                            //  Profile Photo Path
                             $final_photo_path = "";
                             if (!empty($row['profile_photo'])) {
                                 $photo_name = $row['profile_photo'];
@@ -145,7 +144,7 @@ $result = $conn->query($sql);
                                 $final_photo_path = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
                             }
 
-                            // 📁 NIC Copy Path Logic (පැරණි ක්‍රම සියල්ලම පරීක්ෂා කරයි)
+                            //  NIC Copy Path Logic 
                             $final_nic_path = "";
                             if (!empty($row['nic_copy'])) {
                                 $nic_name = $row['nic_copy'];
@@ -160,7 +159,7 @@ $result = $conn->query($sql);
                                     $final_nic_path = "uploads/nic/" . $nic_name;
                                     
                                 } else {
-                                    // කේතයෙන් file එක කෙලින්ම නැතත් database එකේ නමක් තිබේ නම් uploads/ එකෙන් උත්සාහ කරයි
+                                    // code eken file ek direct database eke namak thiyanawanm uploads eken try karana eka
                                     $final_nic_path = "uploads/" . $nic_name;
                                 }
                             }
@@ -183,7 +182,7 @@ $result = $conn->query($sql);
                             <img src="<?php echo $final_photo_path; ?>" class="profile-img" alt="Profile">
                         </td>
 
-                        <!-- NIC Copy (සකස් කරන ලද කොටස) -->
+                        <!-- NIC Copy  -->
                         <td class="text-center">
                             <?php if (!empty($row['nic_copy'])): ?>
                                 <a href="<?php echo $final_nic_path; ?>" target="_blank" class="btn btn-outline-primary btn-sm px-2 fw-bold" style="font-size: 11px;">

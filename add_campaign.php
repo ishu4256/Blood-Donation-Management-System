@@ -12,7 +12,8 @@ if($conn->connect_error){
 $message = "";
 $message_class = "";
 
-//   Submit form and add the data for  Database 
+
+// campaign add karana eka database ekata
 if(isset($_POST['submit'])){
     $title = $conn->real_escape_string($_POST['title']);
     $organizer = $conn->real_escape_string($_POST['organizer']);
@@ -23,6 +24,7 @@ if(isset($_POST['submit'])){
     $end_time = $conn->real_escape_string($_POST['end_time']);
     $description = $conn->real_escape_string($_POST['description']);
 
+
     //  'campaigns'  Table add the data 
     $sql = "INSERT INTO campaigns (title, organizer, location, district, campaign_date, start_time, end_time, description)
             VALUES ('$title', '$organizer', '$location', '$district', '$campaign_date', '$start_time', '$end_time', '$description')";
@@ -30,10 +32,9 @@ if(isset($_POST['submit'])){
     if($conn->query($sql) === TRUE){
         $message = "🎉 Campaign Added Successfully!";
         $message_class = "alert-success";
+       
         
-        // අවශ්‍ය නම් දත්ත ඇතුළත් වූ සැණින් වෙනත් පිටුවකට (ශික්ෂා: view_campaigns.php) Redirect කළ හැක:
-        // header("Location: view_campaigns.php");
-        // exit();
+        
     }else{
         $message = "❌ Error: " . $conn->error;
         $message_class = "alert-danger";
@@ -90,9 +91,9 @@ if(isset($_POST['submit'])){
 </center>
 
 <div class="container mb-5 d-flex justify-content-center">
+
     <div class="container-box w-100">
         <h2 class="text-center mb-4">📢 Add New Blood Donation Campaign</h2>
-        
         
 
         <?php if($message != ""): ?>

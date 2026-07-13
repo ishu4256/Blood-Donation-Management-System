@@ -1,33 +1,28 @@
 <?php
-// 1. Database එකට සම්බන්ධ වීමට අවශ්‍ය විස්තර (Database Connection)
 $servername = "localhost";
-$username = "root";       // XAMPP වල default username එක root වේ
-$password = "";           // XAMPP වල default password එක හිස් (empty) වේ
-$dbname = "blood_donations"; // ඔයා හදපු database එකේ නම
+$username = "root";       
+$password = "";           
+$dbname = "blood_donations"; 
 
-// Connection එක සාදා ගැනීම
 $conn = new mysqli($servername, $username, $password, $dbname);
 
-// Connection එකේ දෝෂයක් ඇත්දැයි පරීක්ෂා කිරීම
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Form එක POST ක්‍රමයට ආවාදැයි පරීක්ෂා කිරීම
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
-    // HTML Form එකෙන් එවපු Data ටික Variables වලට ගැනීම (Security එක සඳහා)
     $name = mysqli_real_escape_string($conn, $_POST['name']);
     $email = mysqli_real_escape_string($conn, $_POST['email']);
     $phone = mysqli_real_escape_string($conn, $_POST['phone']);
     $area = mysqli_real_escape_string($conn, $_POST['area']);
-$preferred_area = $conn->real_escape_string($_POST['preferred_area']); // උදව් කළ හැකි ක්ෂේත්‍රය
-    // 2. Data ටික 'volunteers' table එකට ඇතුළත් කිරීමේ SQL Query එක
-    $sql = "INSERT INTO volunteers (name, email, phone, area, preferred_area) VALUES ('$name', '$email', '$phone', '$area', '$preferred_area')";
+$preferred_area = $conn->real_escape_string($_POST['preferred_area']); 
 
-    // Query එක සාර්ථකව ක්‍රියාත්මක වුනාදැයි බලන්න
+
+$sql = "INSERT INTO volunteers (name, email, phone, area, preferred_area) VALUES ('$name', '$email', '$phone', '$area', '$preferred_area')";
+
+    // Query is successful
     if ($conn->query($sql) === TRUE) {
-        // සාර්ථක නම් User ට පෙන්වන පණිවිඩය (Success Message)
         echo "
         <div style='max-width: 600px; margin: 50px auto; padding: 30px; border: 1px solid #28a745; border-radius: 8px; font-family: Arial, sans-serif; text-align: center; background-color: #d4edda; color: #155724;'>
             <h2>Thank You, $name! ❤️</h2>
@@ -39,15 +34,14 @@ $preferred_area = $conn->real_escape_string($_POST['preferred_area']); // උද
         </div>
         ";
     } else {
-        // මොකක් හරි error එකක් ආවොත් පෙන්වන පණිවිඩය
+        // error awoth pennana eka
         echo "Error: " . $sql . "<br>" . $conn->error;
     }
 
-    // Connection එක Close කිරීම
+    // Connection  Close kirima
     $conn->close();
 
 } else {
-    // කෙලින්ම PHP ෆයිල් එකට එන්න හැදුවොත් more.php එකට Redirect කරනවා
     header("Location: more.php");
     exit();
 }

@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-// 1. පරිශීලකයා ලොග් වී නැත්නම් Login පිටුවට යොමු කිරීම
 if (!isset($_SESSION['username'])) {
     header("Location: login.php");
     exit();
@@ -9,19 +8,18 @@ if (!isset($_SESSION['username'])) {
 
 $username = $_SESSION['username']; // ලොග් වී සිටින පරිශීලකයාගේ Username එක
 
-// Database සම්බන්ධතාවය
 $conn = new mysqli("localhost", "root", "", "blood_donations");
 if($conn->connect_error) { 
     die("Connection Failed : " . $conn->connect_error); 
 }
 
-// try-catch බ්ලොක් එක නිවැරදිව වැඩ කිරීමට MySQLi වල Exceptions සක්‍රිය කිරීම
+// try-catch weda karanna MySQLi wala Exceptions ganna eka
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 $message = "";
 $msg_class = "";
 
-// 2. ලොග් වී සිටින පරිශීලකයාගේ 'donor_id' එක 'users' ටේබල් එකෙන් සොයා ගැනීම
+// log wela inna 'donor_id' ek 'users' table ekn gann ek
 $current_donor_id = 0;
 $user_check = $conn->query("SELECT donor_id FROM users WHERE username = '$username'");
 if ($user_check && $user_check->num_rows > 0) {
@@ -29,10 +27,9 @@ if ($user_check && $user_check->num_rows > 0) {
     $current_donor_id = intval($user_row['donor_id']);
 }
 
-// 3. විස්තර යාවත්කාලීන කිරීමේ කොටස (Update Profile Logic)
+//  (Update Profile Logic)
 if (isset($_POST['update_profile'])) {
     $full_name = $conn->real_escape_string($_POST['full_name']);
-    // මෙතන තිබුණු $name රේඛාව ඉවත් කරන ලදී (ප්‍රොෆයිල් එකෙන් කෙටි නම වෙනස් නොකරන බැවින්)
     $phone = $conn->real_escape_string($_POST['phone']);
     $email = $conn->real_escape_string($_POST['email']);
     $blood_group = $conn->real_escape_string($_POST['blood_group']);
@@ -40,13 +37,12 @@ if (isset($_POST['update_profile'])) {
     $province = $conn->real_escape_string($_POST['province']);
     $donor_id_to_update = intval($_POST['donor_id']);
 
-    // ආරක්ෂිත පියවරක් ලෙස Form එකෙන් එන ID එක සහ ලොග් වී සිටින කෙනාගේ ID එක සමානදැයි බැලීම
+    //  Form  ID = log wela inna kenage  ID samadai balana eka
     if ($donor_id_to_update > 0 && $donor_id_to_update === $current_donor_id) {
         
         $conn->begin_transaction();
 
         try {
-            // ටේබල් 1: donor_details ටේබල් එක යාවත්කාලීන කිරීම (මෙහි 'name' තීරුව යාවත්කාලීන නොවේ)
             $update_details = "UPDATE donor_details SET 
                                full_name = '$full_name', 
                                contact_no = '$phone', 
@@ -57,7 +53,6 @@ if (isset($_POST['update_profile'])) {
                                WHERE donor_id = $donor_id_to_update";
             $conn->query($update_details);
 
-            // ටේබල් 2: donor ටේබල් එක යාවත්කාලීන කිරීම
             $update_donor = "UPDATE donor SET 
                              full_name = '$full_name', 
                              phone = '$phone', 
@@ -84,7 +79,7 @@ if (isset($_POST['update_profile'])) {
     }
 }
 
-// 4. වත්මන් දත්ත 'donor_details' එකෙන් ලබා ගැනීම
+// dn thiyana 'donor_details' labaganna eka
 $user_data = null;
 if ($current_donor_id > 0) {
     $fetch_query = "SELECT * FROM donor_details WHERE donor_id = $current_donor_id";
@@ -245,7 +240,7 @@ function enableEditing() {
 
         editBtn.innerText = "❌ Cancel";
         editBtn.classList.replace('btn-dark', 'btn-danger');
-        saveBtnContainer.classList.remove('0-none'); // d-none වෙනුවට වැරදීමකින් 0-none තිබුණොත් නිවැරදි කරන්න
+        saveBtnContainer.classList.remove('0-none'); 
         saveBtnContainer.classList.remove('d-none');
         firstField.focus();
     } else {

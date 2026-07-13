@@ -1,23 +1,20 @@
 <?php
-// Database එකට සම්බන්ධ වීමේ વિස්තර
 $servername = "localhost";
 $username = "root";       
 $password = "";           
 $dbname = "blood_donations"; 
 
-// Connection එක සාදා ගැනීම
 $conn = new mysqli($servername, $username, $password, $dbname);
 
-// සම්බන්ධතාවය පරීක්ෂා කිරීම
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// 🔄 1. MANUAL APPROVE: Admin විසින් 'Approve' බටන් එක එබූ විට ස්වයංක්‍රීයව Stock අඩු වී Approve වීම
+//   MANUAL APPROVE
 if (isset($_GET['approve_id'])) {
     $approve_id = intval($_GET['approve_id']);
     
-    // මුලින්ම මේ Request එකේ විස්තර (Blood Group සහ Units) ලබා ගැනීම
+    //  Blood Group සහ Units ganna eka
     $req_check = $conn->query("SELECT blood_group, units FROM requests WHERE id=$approve_id");
     
     if ($req_check && $req_check->num_rows > 0) {
@@ -25,19 +22,20 @@ if (isset($_GET['approve_id'])) {
         $b_group = $req_data['blood_group'];
         $b_units = intval($req_data['units']);
 
-        // Stock එකේ මේ වර්ගයෙන් ලේ බෑග් තියෙනවාදැයි බැලීම
+        // Stock eke me bload ek thiyanwada balanna
         $stock_check = $conn->query("SELECT id, units FROM blood_stock WHERE blood_group='$b_group' AND units >= $b_units LIMIT 1");
 
         if ($stock_check && $stock_check->num_rows > 0) {
             $stock_data = $stock_check->fetch_assoc();
             $stock_id = $stock_data['id'];
 
-            // 🛑 Transaction එකක් ආරම්භ කිරීම
+            //  Transaction start karanna
             $conn->begin_transaction();
             try {
-                // A. Request එක Approved කිරීම
+                // A. Request   Approved karana
                 $conn->query("UPDATE requests SET status='Approved' WHERE id=$approve_id");
-                // B. Stock එකෙන් ප්‍රමාණය ස්වයංක්‍රීයව අඩු කිරීම (Automatic Update)
+
+                // B. Stock eken adu karanna (Automatic Update)
                 $conn->query("UPDATE blood_stock SET units = units - $b_units WHERE id=$stock_id");
 
                 $conn->commit();
@@ -52,7 +50,7 @@ if (isset($_GET['approve_id'])) {
     }
 }
 
-// 🔄 2. AUTO-PROCESS: Blood Request Form එක submit කරද්දීම ස්වයංක්‍රීයව සිදුවන ක්‍රියාවලිය
+// 🔄 2. AUTO-PROCESS: 
 if (isset($_POST['add_request'])) {
     
     $patient_name  = $conn->real_escape_string($_POST['patient_name']);
@@ -61,27 +59,25 @@ if (isset($_POST['add_request'])) {
     $required_date = $conn->real_escape_string($_POST['date']);
     $requested_units = intval($_POST['units']); // අලුතින් එකතු කල බෑග් ගණන
 
-    // පද්ධතියේ මෙම ලේ වර්ගයෙන් ප්‍රමාණවත් තොග තිබේදැයි ස්වයංක්‍රීයව බැලීම
     $stock_query = $conn->query("SELECT id, units FROM blood_stock WHERE blood_group = '$blood_group' AND units >= $requested_units LIMIT 1");
 
     $conn->begin_transaction();
     try {
         if ($stock_query && $stock_query->num_rows > 0) {
-            // 👍 තොග තිබේ නම් -> AUTO APPROVE & DEDUCT FROM STOCK
             $stock_row = $stock_query->fetch_assoc();
             $stock_id = $stock_row['id'];
 
-            // A. Requests table එකට Approved ලෙස වැටීම
+            // A. Requests table eke Approved kiyala watena
             $conn->query("INSERT INTO requests (patient_name, blood_group, units, hospital_name, status, date) 
                           VALUES ('$patient_name', '$blood_group', $requested_units, '$hospital_name', 'Approved', '$required_date')");
 
-            // B. Stock එකෙන් ස්වයංක්‍රීයව අඩු වීම
+            // B. Stock eken aduwenna automaticaly
             $conn->query("UPDATE blood_stock SET units = units - $requested_units WHERE id = $stock_id");
 
             $conn->commit();
             echo "<script>alert('🎉 Stock Available! Request approved and stock updated automatically.'); window.location.href='" . basename($_SERVER['PHP_SELF']) . "';</script>";
         } else {
-            // ⚠️ තොග නොමැති නම් -> AUTO PENDING
+            // thoga nathnm AUTO PENDING
             $conn->query("INSERT INTO requests (patient_name, blood_group, units, hospital_name, status, date) 
                           VALUES ('$patient_name', '$blood_group', $requested_units, '$hospital_name', 'Pending', '$required_date')");
             
@@ -94,7 +90,6 @@ if (isset($_POST['add_request'])) {
     }
 }
 
-// 3. Table එකේ පෙන්වීම සඳහා දත්ත ලබා ගැනීම
 $query = "SELECT * FROM requests ORDER BY id DESC";
 $result = $conn->query($query);
 ?>

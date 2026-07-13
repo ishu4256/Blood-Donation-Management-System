@@ -1,26 +1,23 @@
 <?php
-// Session එක ආරම්භ කර පරිශීලකයා ලොග් වී ඇත්දැයි පරීක්ෂා කිරීම
 session_start();
 if (!isset($_SESSION['username'])) {
-    header("Location: login.php"); // ලොග් වී නොමැති නම් නැවත ලොගින් පිටුවට යවයි
+    header("Location: login.php"); 
     exit();
 }
 
-// ඩේටාබේස් සම්බන්ධතාවය (Database Connection)
 $conn = new mysqli("localhost", "root", "", "blood_donations");
 
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Default SQL Query (සියලුම සක්‍රීය campaigns පෙන්වීමට)
 $campaign_sql = "SELECT title, campaign_date, location FROM campaigns WHERE status = 'Active' OR status = 'Upcoming' ORDER BY campaign_date ASC";
 
-// පරිශීලකයා දිනයක් තෝරා Search කර ඇත්නම් SQL Query එක වෙනස් කිරීම
+
+// user date ekk select karam e date ekata adala data vitharak pennna
 $selected_date = "";
 if (isset($_GET['search_date']) && !empty($_GET['search_date'])) {
     $selected_date = $conn->real_escape_string($_GET['search_date']);
-    // තෝරාගත් දිනයට අදාළ දත්ත පමණක් ලබා ගැනීම
     $campaign_sql = "SELECT title, campaign_date, location FROM campaigns WHERE campaign_date = '$selected_date' ORDER BY campaign_date ASC";
 }
 
@@ -28,22 +25,21 @@ $campaign_result = $conn->query($campaign_sql);
 ?>
 
 <?php
-// Database එකෙන් රෝහල් ලැයිස්තුව ලබා ගැනීම
+// Database eken hospital list ek ganna
 $location_string = "";
-// රෝහලේ නම, ලිපිනය (location) සහ දිස්ත්‍රික්කය ලබා ගැනීම
 $hospitals_query = "SELECT name, location, district FROM hospitals";
 $hospitals_result = $conn->query($hospitals_query);
 
 if ($hospitals_result && $hospitals_result->num_rows > 0) {
     $locations_array = [];
     while($h_row = $hospitals_result->fetch_assoc()) {
-        // රෝහලේ නම සහ ලිපිනය එකතු කිරීම (e.g., "Teaching Hospital - Karapitiya, Karapitiya, Galle")
+        // hospital name address add karanna(e.g., "Teaching Hospital - Karapitiya, Karapitiya, Galle")
         $locations_array[] = $h_row['name'] . ", " . $h_row['location'];
     }
-    // සියලුම රෝහල්වල නම් සහ ලිපින ' OR ' මඟින් වෙන් කර එකම සෙවුම් පදයක් (Query) ලෙස සිතියමට ලබා දීම
+    // oll hospital name address' OR ' eken (Query)  lesa map ekata denna
     $location_string = urlencode(implode(" OR ", $locations_array));
 } else {
-    // ඩේටාබේස් එකේ රෝහල් නැත්නම් Default ලෙස ලංකාවේ ලේ බැංකු පෙන්වයි
+    // le banku nathnam danata database eke, lankawe thiyana all le banku penvimata
     $location_string = urlencode("Blood Bank Hospital Sri Lanka");
 }
 ?>
@@ -115,7 +111,6 @@ if ($hospitals_result && $hospitals_result->num_rows > 0) {
             padding:25px;
             border-radius:10px;
             box-shadow:0 0 10px gray;
-            /* සෙවීම් කළ විට මේ කොටසටම focus වීමට අවකාශය සලසයි */
             scroll-margin-top: 20px; 
         }
 
@@ -203,10 +198,10 @@ if ($hospitals_result && $hospitals_result->num_rows > 0) {
         .dashboard-video-container {
     position: relative;
     width: 100%;
-    height: 300px; /* ඔයාට අවශ්‍ය ගාණට වෙනස් කරන්න */
+    height: 300px; 
     overflow: hidden;
     border-radius: 10px;
-}/* පැරණි .bg-video CSS එක වෙනුවට මෙය දාන්න */
+}
 .dashboard-video-container{
     position:relative;
     width:100%;
@@ -272,9 +267,9 @@ if ($hospitals_result && $hospitals_result->num_rows > 0) {
 <body>
 
 <?php 
-// Welcome Message එක ලොගින් වූ පළමු වතාවේ පමණක් පෙන්වීම
+// Welcome Message eka mulma awasthawe pennnana
 if (!isset($_SESSION['welcome_shown'])) { 
-    $_SESSION['welcome_shown'] = true; // පෙන්වූ බව සලකුණු කරයි
+    $_SESSION['welcome_shown'] = true; // pennuwai kiyala pennna
 ?>
     <div class="alert alert-success alert-dismissible fade show text-center m-0 border-0 rounded-0" role="alert" style="font-size: 20px; font-weight: bold;">
         🎉 Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?>!
@@ -559,25 +554,25 @@ if (!isset($_SESSION['welcome_shown'])) {
 
 <script>
 function searchNearestBanks(event) {
-    event.preventDefault(); // Form එක submit වෙලා page එක refresh වීම වලක්වයි
+    event.preventDefault(); // Form eka submit wela page ek refresh wena ek nawaththanna
     
-    // User type කරපු ලොකේෂන් එක ලබා ගැනීම
+    // User type karapu location ek ganna
     var userLocation = document.getElementById('user-location-input').value;
     
     if (userLocation.trim() !== "") {
-        // සිතියමේ URL එක සකස් කිරීම (User ඉන්න තැන + Blood Bank & Hospitals)
+        // map eke url eka (User inna thana  + Blood Bank & Hospitals)
         var searchQuery = encodeURIComponent(userLocation + " Blood Bank Hospital");
         var mapUrl = "https://maps.google.com/maps?q=" + searchQuery + "&t=&z=13&ie=UTF8&iwloc=&output=embed";
         
-        // Iframe එක නව සිතියමට මාරු කිරීම
+        // Iframe ek new map ekkata damima
         document.getElementById('blood-bank-map').src = mapUrl;
         
-        // Popup එක වසා දැමීම (Bootstrap Modal Close)
+        // Popup ek ain karanna (Bootstrap Modal Close)
         var myModalEl = document.getElementById('locationModal');
         var modal = bootstrap.Modal.getInstance(myModalEl);
         modal.hide();
         
-        // සිතියම තියෙන තැනට පිටුව Scroll කිරීම (No Top Scroll)
+        // map ek thiyana thanata page ek scroll kirima (No Top Scroll)
         document.getElementById('map-view-section').scrollIntoView({ behavior: 'smooth' });
     }
 }

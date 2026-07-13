@@ -4,25 +4,23 @@ use PHPMailer\PHPMailer\Exception;
 require 'vendor/autoload.php';
 session_start();
 
-// Admin කෙනෙක්දැයි පරීක්ෂා කිරීම (Security)
 if(!isset($_SESSION['username']) || $_SESSION['role'] != 'admin'){
     header("Location: login.php");
     exit();
 }
 
-// Database සම්බන්ධතාවය
 $conn = new mysqli("localhost", "root", "", "blood_donations");
 
 if($conn->connect_error){
     die("Connection Failed : " . $conn->connect_error);
 }
 
-// 🔔 5. USER CAMPAIGN APPROVAL + EMAIL NOTIFICATION
+//  USER CAMPAIGN APPROVAL + EMAIL NOTIFICATION
 if(isset($_GET['approve_id'])){
 
     $approve_id = intval($_GET['approve_id']);
 
-    // Campaign details ගන්න
+    
     $campaign_result = $conn->query("
         SELECT *
         FROM campaigns
@@ -43,7 +41,7 @@ if(isset($_GET['approve_id'])){
         $end_time      = $campaign['end_time'];
         $description   = $campaign['description'];
 
-        // Campaign approve කරන්න
+        // Campaign approve 
         $approve_query = "
             UPDATE campaigns
             SET status='Upcoming'
@@ -53,7 +51,6 @@ if(isset($_GET['approve_id'])){
 
         if($conn->query($approve_query)){
 
-            // Same district donors පමණක් ලැබීමට අවශ්‍ය නම් WHERE district = '$district' ලෙස වෙනස් කරන්න.
             $donors = $conn->query("
                 SELECT full_name, email
                 FROM donor
@@ -128,7 +125,7 @@ if(isset($_GET['approve_id'])){
     }
 }
 
-// ➕ 1. ADMIN DIRECTLY ADD BLOOD STOCK LOGIC (මැනුවලී එකතු කිරීම)
+//  ADMIN DIRECTLY ADD BLOOD STOCK LOGIC manually
 if(isset($_POST['add_direct_stock'])){
     $district = $conn->real_escape_string($_POST['direct_district']);
     $hospital_name = $conn->real_escape_string($_POST['direct_hospital']); 
@@ -136,11 +133,11 @@ if(isset($_POST['add_direct_stock'])){
     $units = intval($_POST['direct_units']);
     $collected_date = $conn->real_escape_string($_POST['direct_collected_date']); 
 
-    // එකම දවසේ, එකම රෝහලේ, එකම ලේ වර්ගය තිබේදැයි බැලීම
+    // ekama dawase ekama hospital ekata ekama blood group ekata stock update karanna.
     $stock_res = $conn->query("SELECT id FROM blood_stock WHERE district = '$district' AND name = '$hospital_name' AND blood_group = '$blood_group' AND collected_date = '$collected_date' LIMIT 1");
 
     if($stock_res && $stock_res->num_rows > 0){
-        // තිබේ නම් -> Units අගය UPDATE වේ
+        // thiyanwanm units update karanna
         $stock_row = $stock_res->fetch_assoc();
         $stock_id = $stock_row['id'];
         $update_query = "UPDATE blood_stock SET units = units + $units WHERE id = $stock_id";
@@ -152,7 +149,7 @@ if(isset($_POST['add_direct_stock'])){
             echo "Error updating stock: " . $conn->error;
         }
     } else {
-        // නැත්නම් -> අලුතින්ම INSERT වේ (District එකද සමඟ)
+        // nathnm new stock ekak insert karanna district ek saha hospital name ekata.
         $insert_query = "INSERT INTO blood_stock (name, district, blood_group, units, collected_date) VALUES ('$hospital_name', '$district', '$blood_group', $units, '$collected_date')";
         
         if($conn->query($insert_query)){
@@ -164,7 +161,7 @@ if(isset($_POST['add_direct_stock'])){
     }
 }
 
-// 📝 2. CAMPAIGN UPDATE (EDIT) LOGIC
+//  CAMPAIGN UPDATE (EDIT) LOGIC
 if(isset($_POST['update_campaign'])){
     $campaign_id = intval($_POST['campaign_id']);
     $title = $conn->real_escape_string($_POST['title']);
@@ -195,14 +192,14 @@ if(isset($_POST['update_campaign'])){
     }
 }
 
-// 🔄 3. CAMPAIGN COMPLETION & REGIONAL STOCK UPDATE LOGIC
+//  CAMPAIGN COMPLETION & REGIONAL STOCK UPDATE LOGIC
 if(isset($_POST['complete_campaign'])){
     $campaign_id = intval($_POST['campaign_id']);
     $blood_group = strtoupper($conn->real_escape_string($_POST['blood_group']));
     $units = intval($_POST['units']);
     $collected_date = $conn->real_escape_string($_POST['collected_date']); 
 
-    // කැම්පේන් එකේ දිස්ත්‍රික්කය ලබා ගැනීම
+    // campign eke district eka ganna. e district ekata hospital name ekak set karanawa. (ex: Colombo General Hospital)
     $camp_res = $conn->query("SELECT district FROM campaigns WHERE id = $campaign_id AND (status != 'Completed' OR status IS NULL)");
     
     if($camp_res && $camp_res->num_rows > 0){
@@ -232,7 +229,7 @@ if(isset($_POST['complete_campaign'])){
     }
 }
 
-// 🗑️ 4. CAMPAIGN DELETE LOGIC
+//  CAMPAIGN DELETE LOGIC
 if(isset($_GET['delete_id'])){
     $delete_id = intval($_GET['delete_id']);
     $delete_query = "DELETE FROM campaigns WHERE id = $delete_id";
@@ -242,7 +239,7 @@ if(isset($_GET['delete_id'])){
     }
 }
 
-// දිස්ත්‍රික්ක සහ කැම්පේන් දත්ත ලබා ගැනීම
+// district saha campaign list ekak ganna. district list ekak ganna hospitals table eken.
 $districts_list = $conn->query("SELECT DISTINCT district FROM hospitals ORDER BY district ASC");
 $result = $conn->query("SELECT * FROM campaigns ORDER BY id DESC");
 ?>
@@ -546,7 +543,7 @@ function fetchHospitals(districtName) {
     }
 
     var xhr = new XMLHttpRequest();
-    // ඔබගේ AJAX පිටුවට නිවැරදි Path එක ලබා දී ඇති බව තහවුරු කරගන්න (e.g. get_hospitals.php)
+    //  AJAX page ekata niwaradiwa path ek laba ganima (e.g. get_hospitals.php)
     xhr.open("GET", "get_hospitals.php?district=" + encodeURIComponent(districtName), true);
     
     xhr.onreadystatechange = function () {

@@ -1,5 +1,4 @@
 <?php
-// session එක පරීක්ෂා කිරීම (ආරක්ෂාව සඳහා)
 session_start();
 if(!isset($_SESSION['username']) || $_SESSION['role'] != 'admin'){
     header("Location: login.php");
@@ -12,7 +11,6 @@ if($conn->connect_error){
     die("Connection Failed : " . $conn->connect_error);
 }
 
-// Dashboard එකෙන් එන දත්ත ලබා ගැනීම සහ හිස්තැන් (Spaces) ඉවත් කිරීම
 $province = isset($_GET['province']) ? trim($_GET['province']) : '';
 $district = isset($_GET['district']) ? trim($_GET['district']) : '';
 $blood_group = isset($_GET['blood_group']) ? trim($_GET['blood_group']) : '';
@@ -21,14 +19,14 @@ $result = null;
 
 if (!empty($province) && !empty($district) && !empty($blood_group)) {
     
-    // 💡 සෙවුම වඩාත් සාර්ථක කිරීමට අගයන් සිම්පල් අකුරු බවට පත් කර % ලකුණු එකතු කිරීම
+    //  sewma wadath sarthaka karaganimata agayan simple akuru bawata path kara % lakuna ekathu kirima
     $province_query = "%" . strtolower($province) . "%";
     $district_query = "%" . strtolower($district) . "%";
 
-    /* 💡 නිවැරදි කිරීම්: 
-       1. LOWER() සහ LIKE මඟින් කැපිටල්/සිම්පල් අකුරු වල ප්‍රශ්න මඟහරවා ඇත.
-       2. DATEDIFF එක මඟින් දින 42 සීමාව ඉක්මවා ගිය (Expired වූ) ලේ බෑග් සෙවුමෙන් ඉවත් කර ඇත.
-       3. Units 0 ට වඩා වැඩි, දැනට පවතින සක්‍රීය තොග පමණක් පෙන්වයි.
+    /*  
+       1. LOWER() and LIKE capital/simple akuru magaharawa atha
+       2. DATEDIFF eken dina 42 n expired una blood ain karala thiyanawa.
+       3. Units 0 tawadi units pennanawa danat thiyana.
     */
     $query = "SELECT h.id AS hospital_id, h.name AS hospital_name, h.location, h.contact, h.province, h.district, 
                      bs.id AS stock_id, bs.blood_group, bs.units,

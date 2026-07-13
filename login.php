@@ -15,7 +15,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $conn->real_escape_string($_POST['username']);
     $password = $conn->real_escape_string($_POST['password']);
 
-    // 💡 මෙහි USERNAME සහ PASSWORD යන දෙකටම BINARY එකතු කර ඇත.
     $sql = "SELECT * FROM users WHERE BINARY username='$username' AND BINARY password='$password'";
     $result = $conn->query($sql);
 

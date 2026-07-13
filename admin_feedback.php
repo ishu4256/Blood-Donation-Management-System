@@ -19,7 +19,7 @@ if (isset($_POST['mark_seen'])) {
     exit();
 }
 
-// 2. Filter: Dropdown එකෙන් තෝරන ආකාරයට දත්ත පෙරීම
+// 2. Filter Dropdown
 $filter = isset($_GET['filter']) ? $_GET['filter'] : 'Unseen'; // Default පෙන්වන්නේ නොකියවූ ඒවා
 
 if ($filter == 'All') {
@@ -59,7 +59,7 @@ $result = $conn->query($sql);
         <h2 class="mb-4 text-center" style="color: #8e0000; font-weight: bold;">User Feedbacks & Suggestions</h2>
         <hr>
         
-        <!-- 🔍 Filter Selector Box -->
+        <!--  Filter Selector Box -->
         <div class="row my-4 justify-content-end">
             <div class="col-md-5">
                 <form method="GET" action="" class="d-flex align-items-center">
@@ -73,7 +73,7 @@ $result = $conn->query($sql);
             </div>
         </div>
         
-        <!-- 📋 Feedback Table -->
+        <!--  Feedback Table -->
         <div class="table-responsive">
             <table class="table table-bordered table-striped table-hover align-middle">
                 <thead class="table-header text-center">

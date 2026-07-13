@@ -1,13 +1,12 @@
 <?php
 session_start();
 
-// Database සම්බන්ධතාවය
 $conn = new mysqli("localhost", "root", "", "blood_donations");
 if($conn->connect_error) { 
     die("Connection Failed : " . $conn->connect_error); 
 }
 
-// 📊 ඩේටාබේස් එකෙන් බේරාගත් මුළු ජීවිත ගණන (Lives Saved) ලබා ගැනීම
+// database eken beragaththa/release karapu blood count(Lives Saved) 
 $db_lives = 0;
 $release_res = $conn->query("SELECT SUM(units) AS total_released FROM blood_releases");
 if($release_res) {
@@ -15,7 +14,7 @@ if($release_res) {
     $db_lives = $release_row['total_released'] ?? 0; 
 }
 
-// 📅 ඩේටාබේස් එකෙන් අද දිනට හෝ ඉදිරි දිනවලට (Upcoming) ඇති කෑම්ප් විස්තර ලබා ගැනීම
+// Upcoming campping details ganna
 $current_date = date('Y-m-d');
 $camps_res = $conn->query("SELECT * FROM campaigns WHERE campaign_date >= '$current_date' ORDER BY campaign_date ASC");
 ?>
@@ -231,18 +230,15 @@ $camps_res = $conn->query("SELECT * FROM campaigns WHERE campaign_date >= '$curr
             <?php 
             if ($camps_res && $camps_res->num_rows > 0) {
                 while($camp = $camps_res->fetch_assoc()) {
-                    // දිනය ලස්සනට Format කිරීම
                     $camp_date = date("Y F d", strtotime($camp['campaign_date']));
-                    // වේලාවන් Format කිරීම
                     $start = date("g:i A", strtotime($camp['start_time']));
                     $end = date("g:i A", strtotime($camp['end_time']));
                     
-                    // Maps එකට Search Query එකක් ලෙස යැවීමට ලොකේෂන් එක සකසා ගැනීම
+                    // Maps ekata Search Query ekak lesa 
                     $map_query = urlencode($camp['location'] . ' ' . $camp['district']);
             ?>
             <div class="col-lg-4 col-md-6">
                 <div class="event-card">
-                    <!-- Default image එකක් දමා ඇත, අවශ්‍ය නම් වෙනස් කරන්න -->
                     <img src="images/event1.jpg" alt="<?php echo htmlspecialchars($camp['title']); ?>">
                     <div class="event-body">
                         <h4><?php echo htmlspecialchars($camp['title']); ?></h4>

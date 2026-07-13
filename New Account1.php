@@ -7,7 +7,6 @@ if($conn->connect_error){
 }
 
 if(isset($_POST['next'])){
-    // Form එකෙන් එන දත්ත Session එකට සේව් කර ගැනීම
     $_SESSION['reg_name'] = $conn->real_escape_string($_POST['name']);
     $_SESSION['reg_full_name'] = $conn->real_escape_string($_POST['full_name']);
     $_SESSION['reg_address'] = $conn->real_escape_string($_POST['address']);
@@ -21,7 +20,6 @@ if(isset($_POST['next'])){
     $_SESSION['reg_district'] = $conn->real_escape_string($_POST['district']);
     $_SESSION['reg_blood_group'] = $conn->real_escape_string($_POST['blood_group']);
 
-    // ඊළඟ පිටුවට පරිශීලකයාව රැගෙන යාම
     header("Location: New Account2.php");
     exit();
 }

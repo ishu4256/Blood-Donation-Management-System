@@ -1,13 +1,12 @@
 <?php
 session_start();
 
-// Database සම්බන්ධතාවය
 $conn = new mysqli("localhost", "root", "", "blood_donations");
 if($conn->connect_error) { 
     die("Connection Failed : " . $conn->connect_error); 
 }
 
-// 🔍 District Filter කිරීමේ කේතය
+//  District Filter karanna
 $selected_district = "";
 $donors_result = null;
 $search_query = "";
@@ -15,16 +14,16 @@ $search_query = "";
 if (isset($_POST['search_district']) && !empty($_POST['district'])) {
     $selected_district = $conn->real_escape_string($_POST['district']);
     
-    // 💡 ඡායාරූපයට අනුව ටේබල් එක 'donor' විය යුතු අතර column එක 'Districrt' විය යුතුය
+    // photo ekat anuwa 'donor' , column 'Districrt' wenna ona eka
     $search_query = "SELECT * FROM donor WHERE Districrt LIKE '%$selected_district%'";
     $donors_result = $conn->query($search_query);
 } else {
-    // කිසිවක් Search කර නැත්නම් සියලුම දෙනා පෙන්වීමට
+    // mukuth Search karala nathnm all donorsla pennn
     $search_query = "SELECT * FROM donor LIMIT 10";
     $donors_result = $conn->query($search_query);
 }
 
-// Map එක සඳහා Default ලිපිනය (දිස්ත්‍රික්කය අනුව Google Map එක වෙනස් වීමට)
+// Map ekat Default address(district ekat anuwa Google Map ek wenas wenna)
 $map_address = "Sri Lanka";
 if (!empty($selected_district)) {
     $map_address = $selected_district . " Blood Bank, Sri Lanka";
@@ -61,10 +60,10 @@ if (!empty($selected_district)) {
                 .dashboard-video-container {
     position: relative;
     width: 100%;
-    height: 300px; /* ඔයාට අවශ්‍ය ගාණට වෙනස් කරන්න */
+    height: 300px; 
     overflow: hidden;
     border-radius: 10px;
-}/* පැරණි .bg-video CSS එක වෙනුවට මෙය දාන්න */
+}
 .dashboard-video-container{
     position:relative;
     width:100%;

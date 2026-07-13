@@ -14,7 +14,7 @@ if(isset($_POST['done'])){
     $username = $conn->real_escape_string($_POST['username']);
     $phone = $conn->real_escape_string($_POST['phone']);
 
-    // ටේබල් දෙක INNER JOIN එකක් මඟින් එකතු කර පරීක්ෂා කිරීම
+    // table 2 INNER JOIN eken akathu karala pariksha kirima
     $sql = "SELECT u.*, d.contact_no 
             FROM users u 
             INNER JOIN donor_details d ON u.donor_id = d.donor_id 
@@ -26,11 +26,11 @@ if(isset($_POST['done'])){
 
         $otp = rand(100000, 999999);
 
-        // සෙෂන් එකට දත්ත දමා ගැනීම
+        // session ekat data danna
         $_SESSION['reset_username'] = $username;
         $_SESSION['otp'] = $otp;
 
-        // 💡 ටෙස්ට් කිරීමට පහසු වීම සඳහා OTP එක Alert එකක් ලෙස පෙන්වා VerifyOTP.php වෙත යයි
+        // otp alert ekk vidiyata pennala VerifyOTP.php yana ek
         echo "<script>
                 alert('Test OTP is: $otp'); 
                 window.location.href='VerifyOTP.php';

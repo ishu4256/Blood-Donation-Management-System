@@ -14,7 +14,6 @@ $blood_group = isset($_GET['blood_group']) ? trim($conn->real_escape_string($_GE
 $result = null;
 
 if (!empty($province) && !empty($district) && !empty($blood_group)) {
-    // 💡 මෙහිද LOWER() සහ LIKE භාවිතා කර ඇත
     $sql = "SELECT * FROM donor 
             WHERE LOWER(Province) LIKE LOWER('%$province%') 
             AND LOWER(Districrt) LIKE LOWER('%$district%') 

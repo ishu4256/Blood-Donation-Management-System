@@ -1,14 +1,12 @@
 <?php
 session_start();
 
-// Database සම්බන්ධතාවය
 $conn = new mysqli("localhost", "root", "", "blood_donations");
 if($conn->connect_error) { 
     die("Connection Failed : " . $conn->connect_error); 
 }
 
-// 📊 ඩේටාබේස් එකෙන් සැබෑ Counts ලබා ගැනීම
-// 1. ලියාපදිංචි දායකයන් ගණන (Registered Donors)
+//  (Registered Donors) ganana
 $db_donors = 0;
 $donor_res = $conn->query("SELECT COUNT(*) AS total_donors FROM donor");
 if($donor_res) {
@@ -16,7 +14,7 @@ if($donor_res) {
     $db_donors = $donor_row['total_donors'];
 }
 
-// 2. බේරාගත් ජීවිත ගණන (Lives Saved = Total Blood Released Units)
+//  (Lives Saved = Total Blood Released Units)
 $db_lives = 0;
 $release_res = $conn->query("SELECT SUM(units) AS total_released FROM blood_releases");
 if($release_res) {
@@ -24,7 +22,7 @@ if($release_res) {
     $db_lives = $release_row['total_released'] ?? 0; 
 }
 
-// 3. ලේ දීමේ කඳවුරු ගණන (Donation Camps)
+// (Donation Camps)
 $db_camps = 0;
 $camp_res = $conn->query("SELECT COUNT(*) AS total_camps FROM campaigns");
 if($camp_res) {
@@ -367,12 +365,12 @@ footer a:hover{
 </footer>
 
 <script>
-// PHP වලින් ලැබෙන සැබෑ දත්ත ලබා ගැනීම
+// PHP walin labena saba data gann eka
 const maxDonors = <?php echo $db_donors; ?>;
 const maxLives = <?php echo $db_lives; ?>;
 const maxCamps = <?php echo $db_camps; ?>;
 
-// පොදුවේ Counting Animation එක සිදු කරන Function එක
+//  Counting Animation ek karana Function 
 function animateCounter(elementId, targetValue, duration) {
     let obj = document.getElementById(elementId);
     if (targetValue === 0) {
@@ -392,7 +390,7 @@ function animateCounter(elementId, targetValue, duration) {
     window.requestAnimationFrame(step);
 }
 
-// පිටුව Load වූ විගස සජීවීකරණය ආරම්භ කිරීම (මිලිසෙකන්ඩ් 1500 ක කාලයක් තුල)
+// page Load unama animation  1500ms time ekk thula
 window.addEventListener('DOMContentLoaded', () => {
     animateCounter("donors", maxDonors, 1500);
     animateCounter("lives", maxLives, 1500);

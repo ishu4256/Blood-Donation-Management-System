@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-// OTP එක වෙරිෆයි නොකර කෙලින්ම ආවොත් හරවා යැවීම
+// OTP ek werify nokara awoth kelinma aimath yawana eka
 if(!isset($_SESSION['otp_verified']) || !isset($_SESSION['reset_username'])){
     header("Location: ForgetPassword.php");
     exit();
@@ -16,15 +16,13 @@ if(isset($_POST['reset'])){
     $username = $_SESSION['reset_username'];
 
     if($new_pass === $confirm_pass){
-        // ⚠️ සටහන: ඔයා ඩේටාබේස් එකේ password ප්ලේන් ටෙක්ස්ට් (1234) විදිහටම සේව් කරන නිසා මෙලෙස දැම්මා. 
-        // ආරක්ෂාව සඳහා $hashed_pass = password_hash($new_pass, PASSWORD_DEFAULT); භාවිතා කිරීම වඩා සුදුසුයි.
+       
         $escaped_pass = $conn->real_escape_string($new_pass);
 
-        // users ටේබල් එකේ password එක වෙනස් කිරීමේ SQL Query එක
+        // users table ke password cahnge karana SQL Query 
         $sql = "UPDATE users SET password='$escaped_pass' WHERE username='$username'";
 
         if($conn->query($sql)){
-            // සෙෂන්ස් සියල්ල ඉවත් කිරීම
             session_destroy();
             echo "<script>
                     alert('🎉 Password Reset Successfully! Please login with your new password.'); 

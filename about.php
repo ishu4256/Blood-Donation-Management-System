@@ -1,14 +1,14 @@
 <?php
 session_start();
 
-// Database සම්බන්ධතාවය
+// Database connection
 $conn = new mysqli("localhost", "root", "", "blood_donations");
 if($conn->connect_error) { 
     die("Connection Failed : " . $conn->connect_error); 
 }
 
-// 📊 ඩේටාබේස් එකෙන් Counts ලබා ගැනීම
-// 1. ලියාපදිංචි දායකයන් ගණන (Registered Donors)
+
+// count of (Registered Donors)
 $donor_count = 0;
 $donor_res = $conn->query("SELECT COUNT(*) AS total_donors FROM donor");
 if($donor_res) {
@@ -16,7 +16,8 @@ if($donor_res) {
     $donor_count = $donor_row['total_donors'];
 }
 
-// 2. බේරාගත් ජීවිත ගණන (Lives Saved = Total Blood Released Units)
+
+//  Total Blood Released Units
 $lives_saved = 0;
 $release_res = $conn->query("SELECT SUM(units) AS total_released FROM blood_releases");
 if($release_res) {
@@ -25,7 +26,8 @@ if($release_res) {
     $lives_saved = $release_row['total_released'] ?? 0; 
 }
 
-// 3. ලේ දීමේ කඳවුරු ගණන (Donation Camps)
+
+//  (Donation Camps)
 $camp_count = 0;
 $camp_res = $conn->query("SELECT COUNT(*) AS total_camps FROM campaigns");
 if($camp_res) {
@@ -33,6 +35,8 @@ if($camp_res) {
     $camp_count = $camp_row['total_camps'];
 }
 ?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -112,6 +116,8 @@ if($camp_res) {
     
 </div>
 
+
+
 <div class="hero">
     <div class="nav-buttons">
         <a href="Dashboard.php" class="btn btn-light">Dashboard</a>
@@ -127,6 +133,8 @@ if($camp_res) {
     <h1 class="mt-5">About Blood Donation Sri Lanka</h1>
     <p>Saving Lives Through Technology & Community Support</p>
 </div>
+
+
 
 <div class="container py-5">
 
@@ -201,6 +209,8 @@ if($camp_res) {
 
 </div>
 
+
+
 <footer>
     <div class="container">
         <div class="row">
@@ -222,6 +232,7 @@ if($camp_res) {
         </div>
     </div>
 </footer>
+
 
 </body>
 </html>

@@ -67,8 +67,7 @@ $result = $conn->query("SELECT * FROM donor ORDER BY donor_id DESC");
     </table>
 
     <script>
-        // පිටුවට ආ සැනින් Print Dialog එක auto open වීමට අවශ්‍ය නම්:
-        // window.onload = function() { window.print(); }
+        
     </script>
 </body>
 </html>

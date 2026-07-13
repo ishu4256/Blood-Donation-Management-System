@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-// Admin කෙනෙක්දැයි පරීක්ෂා කිරීම (Security)
 if(!isset($_SESSION['username']) || $_SESSION['role'] != 'admin'){
     header("Location: login.php");
     exit();
@@ -16,7 +15,7 @@ if($conn->connect_error){
 $message = "";
 $message_class = "";
 
-// 1. URL එකෙන් එන ID එකට අදාළ දැනට පවතින දත්ත කියවීම
+// 1. URL eken ena ID ekata adala danata thiyana daththa kiyawanna
 if(isset($_GET['id'])) {
     $stock_id = intval($_GET['id']);
     $stmt = $conn->prepare("SELECT * FROM blood_stock WHERE id = ?");
@@ -35,20 +34,18 @@ if(isset($_GET['id'])) {
     exit();
 }
 
-// 2. Form එක Submit කළ පසු දත්ත යාවත්කාලීන කිරීම (Update Logic)
+// 2. Form eka Submit karata passe Update Logic
 if(isset($_POST['update_stock'])){
     $hospital_name = $conn->real_escape_string($_POST['hospital_name']);
     $blood_group = $conn->real_escape_string($_POST['blood_group']);
     $units = intval($_POST['units']);
     $collected_date = $conn->real_escape_string($_POST['collected_date']);
 
-    // ඔබේ database එකේ තීරු වල නම් (name, blood_group, units, collected_date) ලෙස සකසා ඇත
     $update_stmt = $conn->prepare("UPDATE blood_stock SET name = ?, blood_group = ?, units = ?, collected_date = ? WHERE id = ?");
     $update_stmt->bind_param("ssisi", $hospital_name, $blood_group, $units, $collected_date, $stock_id);
     
     if($update_stmt->execute()){
-        // සාර්ථකව අප්ඩේට් වූ පසු පණිවිඩයක් සමඟ නැවත ලැයිස්තුවට යොමු කෙරේ
-        // (සටහන: ඔබේ ලැයිස්තු පිටුවේ නම වෙනස් නම් 'blood_stock.php' වෙනුවට එය යොදන්න)
+        // update unata passe ena massage ek
         echo "<script>alert('🎉 Blood stock updated successfully!'); window.location.href='blood_stock.php';</script>";
         exit();
     } else {
@@ -57,7 +54,7 @@ if(isset($_POST['update_stock'])){
     }
 }
 
-// Dropdown එක සඳහා රෝහල් ලැයිස්තුව ලබා ගැනීම
+// Dropdown ekata hospital tika ganna
 $hospitals_result = $conn->query("SELECT name FROM hospitals ORDER BY name ASC");
 ?>
 
@@ -114,7 +111,6 @@ $hospitals_result = $conn->query("SELECT name FROM hospitals ORDER BY name ASC")
                     <?php 
                     if($hospitals_result && $hospitals_result->num_rows > 0){
                         while($h_row = $hospitals_result->fetch_assoc()){
-                            // දැනට ඩේටාබේස් එකේ ඇති රෝහල auto-selected කිරීමට
                             $selected = ($h_row['name'] == $stock['name']) ? 'selected' : '';
                             echo "<option value='".htmlspecialchars($h_row['name'])."' $selected>".htmlspecialchars($h_row['name'])."</option>";
                         }

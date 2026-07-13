@@ -1,16 +1,20 @@
 <?php
 session_start();
+//role ek adminda kiyala balana eka 
 if(!isset($_SESSION['username']) || $_SESSION['role'] != 'admin'){
     header("Location: login.php");
     exit();
 }
 
+
+//connection eka
 $conn = new mysqli("localhost", "root", "", "blood_donations");
 if($conn->connect_error){
     die("Connection Failed : " . $conn->connect_error);
 }
 
-// AJAX Request
+
+// hospital list eka district ekata anuwa ganna eka
 if(isset($_GET['get_hospitals_by_district'])) {
     $district = $conn->real_escape_string($_GET['get_hospitals_by_district']);
     $query = "SELECT name FROM hospitals WHERE district = '$district' ORDER BY name ASC";
@@ -30,6 +34,8 @@ if(isset($_GET['get_hospitals_by_district'])) {
 $message = "";
 $message_class = "";
 
+
+//blood stock add karana eka
 if(isset($_POST['submit_stock'])){
     $district = $_POST['district']; 
     $hospital_name = $_POST['hospital_name']; 
@@ -57,6 +63,7 @@ if(isset($_POST['submit_stock'])){
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html>
@@ -131,6 +138,8 @@ if(isset($_POST['submit_stock'])){
 </div>
 
 <script>
+    
+    //select district ekata anuwa hospital list eka ganna eka
 document.getElementById('districtSelect').addEventListener('change', function() {
     var district = this.value;
     var hospitalSelect = document.getElementById('hospitalSelect');

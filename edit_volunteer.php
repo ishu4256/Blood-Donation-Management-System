@@ -5,7 +5,7 @@ if ($conn->connect_error) {
     die("Connection Failed : " . $conn->connect_error);
 }
 
-// 1. අදාළ Volunteer ගේ දැනට පවතින දත්ත Database එකෙන් කියවීම
+//  Volunteer data Database eken ganna
 if (isset($_GET['id'])) {
     $id = $conn->real_escape_string($_GET['id']);
     $result = $conn->query("SELECT * FROM volunteers WHERE id='$id'");
@@ -21,7 +21,7 @@ if (isset($_GET['id'])) {
     exit();
 }
 
-// 2. Update Button එක ක්ලික් කළ විට දත්ත Update කිරීම
+//  Update Button ek click karam wenn ona tika
 if (isset($_POST['update'])) {
     $name = $conn->real_escape_string($_POST['name']);
     $email = $conn->real_escape_string($_POST['email']);
@@ -80,7 +80,7 @@ if (isset($_POST['update'])) {
                 <input type="text" name="phone" class="form-control" value="<?php echo $row['phone']; ?>" required>
             </div>
 
-            <!-- 🗺️ Area / District Dropdown (කලින් තේරූ දිස්ත්‍රික්කය Auto-select වේ) -->
+            <!-- Area / District Dropdown /select wena ek thorapu district eken -->
             <div class="mb-3">
                 <label class="form-label fw-bold text-secondary">Area / District</label>
                 <select name="area" class="form-select" required>
@@ -94,7 +94,7 @@ if (isset($_POST['update'])) {
                 </select>
             </div>
 
-            <!-- 🛠️ Preferred Area Dropdown (කලින් තේරූ ක්ෂේත්‍රය Auto-select වේ) -->
+            <!--  Preferred Area Dropdown  -->
             <div class="mb-4">
                 <label class="form-label fw-bold text-secondary">Preferred Area (උදව් කළ හැකි ක්ෂේත්‍රය)</label>
                 <select name="preferred_area" class="form-select" required>

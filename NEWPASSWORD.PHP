@@ -6,6 +6,7 @@ if(!isset($_SESSION['reset_username'])){
     die("Session expired!");
 }
 
+
 if(isset($_POST['reset'])){
 
     $new_password = $_POST['new_password'];

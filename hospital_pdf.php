@@ -10,6 +10,8 @@ if($conn->connect_error) { die("Connection Failed : " . $conn->connect_error); }
 
 $result = $conn->query("SELECT * FROM hospitals ORDER BY id DESC");
 ?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>

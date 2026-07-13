@@ -10,7 +10,7 @@ if (isset($_POST['save'])) {
     $email = $conn->real_escape_string($_POST['email']);
     $phone = $conn->real_escape_string($_POST['phone']);
     $area = $conn->real_escape_string($_POST['area']);
-    $preferred_area = $conn->real_escape_string($_POST['preferred_area']); // නව අගය ලබා ගැනීම
+    $preferred_area = $conn->real_escape_string($_POST['preferred_area']); 
     $registered_at = $conn->real_escape_string($_POST['registered_at']);
 
     $conn->query("INSERT INTO volunteers(name, email, phone, area, preferred_area, registered_at) 
@@ -20,6 +20,8 @@ if (isset($_POST['save'])) {
     exit();
 }
 
+
+//timezone set kirima date and time ganna
 date_default_timezone_set('Asia/Colombo');
 $current_datetime = date('Y-m-d H:i:s');
 ?>
@@ -81,7 +83,6 @@ $current_datetime = date('Y-m-d H:i:s');
                 <option value="Kegalle">Kegalle</option>
             </select>
 
-            <!-- 🛠️ Preferred Area Dropdown -->
             <label class="form-label fw-bold text-secondary">Preferred Area (උදව් කළ හැකි ක්ෂේත්‍රය)</label>
             <select name="preferred_area" class="form-select mb-3" required>
                 <option value="" disabled selected>Select Preferred Area</option>

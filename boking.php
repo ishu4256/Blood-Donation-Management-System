@@ -1,11 +1,11 @@
 <?php
 session_start();
 
-// PHPMailer සඳහා අවශ්‍ය පන්ති (Classes) ඇතුළත් කිරීම
+// email yawanna PHPMailer use karanna
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-// 💡 ඔබේ vendor ෆෝල්ඩරයේ පිහිටීමට අනුව Path එක නිවැරදිවම මෙසේ සකස් කරන ලදී:
+// path to PHPMailer autoload.php
 require __DIR__ . '/vendor/phpmailer/phpmailer/src/Exception.php';
 require __DIR__ . '/vendor/phpmailer/phpmailer/src/PHPMailer.php';
 require __DIR__ . '/vendor/phpmailer/phpmailer/src/SMTP.php';
@@ -18,13 +18,13 @@ if(!isset($_SESSION['username']) || $_SESSION['role'] != 'admin'){
 $conn = new mysqli("localhost", "root", "", "blood_donations");
 if($conn->connect_error){ die("Connection Failed : " . $conn->connect_error); }
 
-// 🔄 ADMIN APPROVAL, STOCK REDUCTION, RELEASE TRACKING & EMAIL NOTIFICATION LOGIC
+//  ADMIN APPROVAL, STOCK REDUCTION, RELEASE TRACKING & EMAIL NOTIFICATION LOGIC
 if(isset($_POST['approve_booking'])){
     $approve_id = intval($_POST['booking_id']);
     $pickup_date = $conn->real_escape_string($_POST['pickup_date']);
     $pickup_time = $conn->real_escape_string($_POST['pickup_time']);
     
-    // Booking විස්තර ලබා ගැනීම
+    // Booking details fetch karanna
     $booking_res = $conn->query("SELECT * FROM blood_bookings WHERE id = $approve_id AND status = 'Pending'");
     
     if($booking_res && $booking_res->num_rows > 0){
@@ -36,40 +36,40 @@ if(isset($_POST['approve_booking'])){
         $b_hospital = $conn->real_escape_string($booking['hospital_name']);
         $b_address = $conn->real_escape_string($booking['address']); 
 
-        // රෝහලේ ඇති තොගය ප්‍රමාණවත් දැයි බැලීම
+        // hospital stock check kirimsts
         $stock_res = $conn->query("SELECT id, units FROM blood_stock WHERE name = '$b_hospital' AND blood_group = '$b_group' AND units >= $b_units LIMIT 1");
 
         if($stock_res && $stock_res->num_rows > 0){
             $stock = $stock_res->fetch_assoc();
             $stock_id = $stock['id'];
 
-            // Transaction එකක් ආරම්භ කිරීම
+            // Transaction 
             $conn->begin_transaction();
             try {
-                // 1. Status එක Approved කිරීම
+                // 1. Status  eka approve karanna
                 $conn->query("UPDATE blood_bookings SET status = 'Approved' WHERE id = $approve_id");
                 
-                // 2. අදාළ රෝහලේ Stock එකෙන් අඩු කිරීම
+                // 2. adala hospital stock eka reduce karanna
                 $conn->query("UPDATE blood_stock SET units = units - $b_units WHERE id = $stock_id");
 
-                // 3. blood_releases ටේබල් එකට දත්ත ඇතුළත් කිරීම
+                // 3. blood_releases table ekata record ekak insert karanna
                 $release_sql = "INSERT INTO blood_releases (booking_id, patient_name, hospital_name, blood_group, units, address) 
                                 VALUES ($approve_id, '$b_name', '$b_hospital', '$b_group', $b_units, '$b_address')";
                 $conn->query($release_sql);
 
-                // 📅 දිනය සහ වෙලාව කියවීමට පහසු ආකාරයට සකස් කිරීම
+                // date and time format karanna
                 $formatted_time = date("h:i A", strtotime($pickup_time));
                 $formatted_date = date("F j, Y", strtotime($pickup_date));
 
-                // 📧 4. PHPMailer මඟින් ඊමේල් එක සත්‍ය ලෙසම පිටත් කිරීමේ කේතය
+                //  4. PHPMailer eken email gann ekk
                 $mail = new PHPMailer(true);
 
-                // SMTP Settings (Gmail භාවිතයෙන් ඊමේල් යැවීමට)
+                // SMTP Settings Gmail use karala  
                 $mail->isSMTP();
                 $mail->Host       = 'smtp.gmail.com';
                 $mail->SMTPAuth   = true;
-                $mail->Username   = 'sandarekaishani83@gmail.com';  // 💡 ඔබේ සිස්ටම් එක වෙනුවෙන් භාවිතා කරන Gmail ලිපිනය
-                $mail->Password   = 'zmnr dbgs jxhv kqqk';     // 💡 Gmail App Password එකක් සාදා මෙතැනට දෙන්න
+                $mail->Username   = 'sandarekaishani83@gmail.com';  //  system eka use karana email eka
+                $mail->Password   = 'zmnr dbgs jxhv kqqk';     
                 $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                 $mail->Port       = 587;
 

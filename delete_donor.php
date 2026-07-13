@@ -8,4 +8,5 @@ $conn->query("DELETE FROM donor WHERE donor_id='$id'");
 
 header("Location:view_donors.php");
 
+
 ?>

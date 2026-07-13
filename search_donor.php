@@ -31,7 +31,6 @@ if (!empty($province) && !empty($district)) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            /* 💡 Dashboard එකට සමාන Background Image එක */
 background: #31080c;    
         background-size: cover;
             background-position: center;
@@ -56,7 +55,6 @@ background: #31080c;
             padding-left: 15px;
         }
 
-        /* 💡 Table Head එකට රතු/තද පැහැති Gradient එකක් දමා ඇත */
         .table-custom-dark {
             background: linear-gradient(135deg, #8e0000, #c0392b);
             color: white;
@@ -137,7 +135,7 @@ background: #31080c;
                     <?php 
                     if ($result && $result->num_rows > 0) {
                         while($row = $result->fetch_assoc()) {
-                            // Status එක අනුව Badge එකේ පාට වෙනස් කිරීම
+                            // Status ek anuwa Badge eke color wenas karanna
                             $status_class = (trim($row['availability_status']) == 'Available') ? 'bg-success' : 'bg-secondary';
                             
                             echo "<tr>

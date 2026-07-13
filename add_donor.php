@@ -1,6 +1,7 @@
 <?php
 session_start();
-// ආරක්ෂාව සඳහා Admin ද යන්න පරීක්ෂා කිරීම
+
+// adminda login wela inne kiyala balanawa ehema nathi unoth login page ekata yanwa
 if(!isset($_SESSION['username']) || $_SESSION['role'] != 'admin'){
     header("Location: login.php");
     exit();
@@ -12,8 +13,9 @@ if($conn->connect_error){
     die("Connection Failed : " . $conn->connect_error);
 }
 
+
+    // Form eken data ganna eka
 if(isset($_POST['save'])){
-    // Form එකෙන් එන සාමාන්‍ය දත්ත ආරක්ෂිතව ලබා ගැනීම
     $full_name = $conn->real_escape_string($_POST['full_name']);
     $nic = $conn->real_escape_string($_POST['nic']);
     $dob = !empty($_POST['dob']) ? $conn->real_escape_string($_POST['dob']) : NULL;
@@ -30,10 +32,11 @@ if(isset($_POST['save'])){
     $province = strtolower(trim($conn->real_escape_string($_POST['province'])));
     $district = strtolower(trim($conn->real_escape_string($_POST['district'])));
 
-    // 📁 Files Upload කිරීමේ ක්‍රියාවලිය
+    //  Files Upload kirima nic,photo
     $target_dir = "uploads/";
     
-    // 1. NIC Copy Upload එක හැසිරවීම
+
+    // nic upload
     $nic_copy = "";
     if(!empty($_FILES['nic_copy']['name'])) {
         $nic_filename = time() . "_nic_" . basename($_FILES["nic_copy"]["name"]);
@@ -43,7 +46,8 @@ if(isset($_POST['save'])){
         }
     }
 
-    // 2. Profile Photo Upload එක හැසිරවීම
+
+    // profile photo upload
     $profile_photo = "";
     if(!empty($_FILES['profile_photo']['name'])) {
         $profile_filename = time() . "_profile_" . basename($_FILES["profile_photo"]["name"]);
@@ -53,7 +57,8 @@ if(isset($_POST['save'])){
         }
     }
 
-    // 💡 nic_copy සහ profile_photo තීරුද ඇතුළත් කළ නව INSERT Query එක
+
+    // data database ekata add karana sql eka
     $sql = "INSERT INTO donor 
             (full_name, nic, dob, gender, phone, email, address, blood_group, weight, last_donation_date, diseases, medicines, availability_status, Districrt, Province, nic_copy, profile_photo)
             VALUES 
@@ -84,6 +89,7 @@ if(isset($_POST['save'])){
 </head>
 <body>
 
+
 <div class="container mt-5 mb-5">
     <div class="row justify-content-center">
         <div class="col-lg-9">
@@ -92,7 +98,7 @@ if(isset($_POST['save'])){
                 <h2 class="text-center mb-4">🩸 Register New Blood Donor</h2>
                 <hr class="mb-4">
 
-                <!-- 💡 වැදගත්: ෆයිල්ස් අප්ලෝඩ් කිරීමට enctype="multipart/form-data" ඇතුළත් කර ඇත -->
+                <!--  data post eken upload kirima -->
                 <form method="post" enctype="multipart/form-data">
                     
                     <div class="mb-3">
@@ -196,7 +202,6 @@ if(isset($_POST['save'])){
                         </div>
                     </div>
 
-                    <!-- 💡 මෙන්න අලුතෙන් එකතු කල NIC සහ Profile Photo ලබා ගන්නා File Inputs දෙක -->
                     <div class="row border-top pt-3 mt-3">
                         <div class="col-md-6 mb-3">
                             <label class="text-danger">📄 Upload NIC Copy (Image/PDF)</label>
@@ -220,6 +225,7 @@ if(isset($_POST['save'])){
 </div>
 
 <script>
+    // filter Districts by Province 
 const districtsByProvince = {
     "Western": ["Colombo", "Gampaha", "Kalutara"],
     "Southern": ["Galle", "Matara", "Hambantota"],

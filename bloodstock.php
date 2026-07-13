@@ -8,24 +8,24 @@ if(!isset($_SESSION['username']) || $_SESSION['role'] != 'admin'){
 $conn = new mysqli("localhost", "root", "", "blood_donations");
 if($conn->connect_error) { die("Connection Failed : " . $conn->connect_error); }
 
-// 🔍 Filter Status එක ලබා ගැනීම
+// get Filter Status 
 $filter = isset($_GET['expiry_filter']) ? $_GET['expiry_filter'] : 'all';
 
-// SQL Query එක - DATEDIFF එකෙන් අද දවසේ සිට දින 42ක් ඇතුලත ඉතිරි දින ගණන හදනවා
+// SQL Query  - DATEDIFF +42 days
 $sql = "SELECT *, 
         DATEDIFF(DATE_ADD(collected_date, INTERVAL 42 DAY), CURDATE()) AS days_remaining 
         FROM blood_stock";
 
-// Filter එක අනුව SQL Query එක වෙනස් කිරීම
+// change query based on filter
 if ($filter == 'expired') {
     $sql .= " HAVING days_remaining <= 0";
 } elseif ($filter == 'critical') {
-    $sql .= " HAVING days_remaining > 0 AND days_remaining <= 7"; // සතියක් හෝ ඊට අඩු
+    $sql .= " HAVING days_remaining > 0 AND days_remaining <= 7"; // we can also use "BETWEEN 1 AND 7" instead of "> 0 AND <= 7"
 } elseif ($filter == 'safe') {
     $sql .= " HAVING days_remaining > 7";
 }
 
-$sql .= " ORDER BY days_remaining ASC"; // ඉක්මනින්ම කල් ඉකුත් වන ඒවා උඩටම ගැනීමට
+$sql .= " ORDER BY days_remaining ASC"; 
 $result = $conn->query($sql);
 ?>
 <!DOCTYPE html>
@@ -92,17 +92,17 @@ $result = $conn->query($sql);
                 while($row = $result->fetch_assoc()) {
                     $days = $row['days_remaining'];
                     
-                    // තියාගන්න පුළුවන් දින ගණන අනුව පාට සහ Status එක තීරණය කිරීම
+                    // determine status and badge class based on days remaining
                     if ($days <= 0) {
                         $status_text = "Expired";
                         $badge_class = "bg-danger text-white";
                         $days_text = "Expired (" . abs($days) . " days ago)";
-                        $row_class = "table-danger"; // මුළු රෝ එකම රතු පාට වේ
+                        $row_class = "table-danger"; // this row will be highlighted in red
                     } elseif ($days <= 7) {
                         $status_text = "Urgent / Critical";
                         $badge_class = "bg-warning text-dark";
                         $days_text = $days . " Days Left";
-                        $row_class = "table-warning"; // මුළු රෝ එකම කහ පාට වේ
+                        $row_class = "table-warning"; // this row will be highlighted in yellow
                     } else {
                         $status_text = "Safe";
                         $badge_class = "bg-success text-white";

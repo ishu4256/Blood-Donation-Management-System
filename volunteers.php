@@ -46,7 +46,7 @@ h2 {
                 <th>Email</th>
                 <th>Phone</th>
                 <th>Area / District</th>
-                <th>Preferred Area</th> <!-- නව Column එක -->
+                <th>Preferred Area</th> 
                 <th>Registered At</th>
                 <th>Actions</th>
             </tr>
@@ -58,7 +58,7 @@ h2 {
                 <td><?php echo $row['email']; ?></td>
                 <td><?php echo $row['phone']; ?></td>
                 <td><?php echo $row['area']; ?></td>
-                <td><?php echo $row['preferred_area']; ?></td> <!-- නව දත්තය -->
+                <td><?php echo $row['preferred_area']; ?></td> 
                 <td><?php echo $row['registered_at']; ?></td>
                 <td>
                     <a href="edit_volunteer.php?id=<?php echo $row['id']; ?>" class="btn btn-warning btn-sm">Edit</a>

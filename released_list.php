@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-// Admin ද යන්න පරීක්ෂාව
 if(!isset($_SESSION['username']) || $_SESSION['role'] != 'admin'){
     header("Location: login.php");
     exit();
@@ -10,7 +9,6 @@ if(!isset($_SESSION['username']) || $_SESSION['role'] != 'admin'){
 $conn = new mysqli("localhost", "root", "", "blood_donations");
 if($conn->connect_error){ die("Connection Failed : " . $conn->connect_error); }
 
-// රිලීස් කරපු දත්ත අලුත්ම ඒවා මුලට එන සේ ලබා ගැනීම
 $query = "SELECT * FROM blood_releases ORDER BY id DESC";
 $result = $conn->query($query);
 ?>
@@ -78,7 +76,6 @@ $result = $conn->query($query);
                     <?php 
                         } 
                     } else {
-                        // 💡 මෙන්න මෙතන Colspan එක 8 කලා ටේබල් එක ලස්සනට පේන්න
                         echo "<tr><td colspan='8' class='text-center text-muted py-4'>No blood release records found.</td></tr>";
                     }
                     ?>

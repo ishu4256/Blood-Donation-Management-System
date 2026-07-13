@@ -300,7 +300,7 @@
     </div>
 </div>
 
-<!-- 2. HOSPITAL PARTNERS MODAL (DATABASE එකේ සියලුම රෝහල් 24 ඇතුළත් කර ඇත) -->
+<!-- 2. HOSPITAL PARTNERS MODAL  -->
 <div class="modal fade" id="partnerModal" tabindex="-1" aria-labelledby="partnerModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow">

@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-// ForgetPassword පිටුවෙන් නොවී කෙලින්ම ආවොත් හරවා යැවීම
+// ForgetPassword pituwen arenn wena ona ekkin awoth apassata yanna 
 if(!isset($_SESSION['otp']) || !isset($_SESSION['reset_username'])){
     header("Location: ForgetPassword.php");
     exit();
@@ -12,9 +12,9 @@ $error_msg = "";
 if(isset($_POST['verify'])){
     $user_otp = trim($_POST['otp']);
 
-    // Session එකේ තියෙන OTP එකත් එක්ක පරිශීලකයා ගැහුව OTP එක සමානද බැලීම
+    // Session eke thiyana OTP ekath ekk user gahuwa OTP ek samanada balima
     if($user_otp == $_SESSION['otp']){
-        $_SESSION['otp_verified'] = true; // ඊළඟ පිටුවට යන්න අවසර දීම
+        $_SESSION['otp_verified'] = true; // ilaga pituwat yann awasara dima
         header("Location: ResetPassword.php");
         exit();
     } else {

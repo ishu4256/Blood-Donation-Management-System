@@ -9,7 +9,6 @@ if (isset($_POST['search'])) {
     $selected_blood = $conn->real_escape_string($_POST['blood_group']);
     
     if (!empty($selected_blood)) {
-        // SQL query එක Capital O+ / O- වලට ගැළපෙන සේ නිවැරදි කර ඇත
         $sql = "SELECT name, district, blood_group, SUM(units) AS total_units 
                 FROM blood_stock 
                 WHERE UPPER(blood_group) = UPPER('$selected_blood') 

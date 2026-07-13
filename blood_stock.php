@@ -1,17 +1,16 @@
 <?php
-// 1. Database එකට සම්බන්ධ වීම
 $conn = new mysqli("localhost", "root", "", "blood_donations");
 
-// සම්බන්ධතාවය පරීක්ෂා කිරීම
+// check connection
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// 🔍 Filter අගයන් ලබා ගැනීම
+// get filters from GET parameters
 $expiry_filter = isset($_GET['expiry_filter']) ? $_GET['expiry_filter'] : 'all';
 $blood_filter = isset($_GET['blood_filter']) ? $_GET['blood_filter'] : 'all';
 
-// Base SQL Query එක
+
 $sql = "SELECT *, 
         DATEDIFF(DATE_ADD(collected_date, INTERVAL 42 DAY), CURDATE()) AS days_remaining 
         FROM blood_stock";
@@ -21,7 +20,7 @@ $where_conditions = [];
 $params = [];
 $types = "";
 
-// 1. Expiry Filter එක (HAVING ලෙස)
+//  Expiry Filter 
 if ($expiry_filter == 'expired') {
     $having_conditions[] = "days_remaining <= 0";
 } elseif ($expiry_filter == 'critical') {
@@ -30,26 +29,26 @@ if ($expiry_filter == 'expired') {
     $having_conditions[] = "days_remaining > 7";
 }
 
-// 2. Blood Group Filter එක (WHERE ලෙස)
+// Blood Group Filter 
 if ($blood_filter != 'all') {
     $where_conditions[] = "blood_group = ?";
     $params[] = $blood_filter;
     $types .= "s";
 }
 
-// WHERE කොන්දේසි එකතු කිරීම
+// WHERE conditions add kirima
 if (count($where_conditions) > 0) {
     $sql .= " WHERE " . implode(" AND ", $where_conditions);
 }
 
-// HAVING කොන්දේසි එකතු කිරීම
+// HAVING conditions add kirima
 if (count($having_conditions) > 0) {
     $sql .= " HAVING " . implode(" AND ", $having_conditions);
 }
 
 $sql .= " ORDER BY days_remaining ASC"; 
 
-// Prepared Statement එක නිවැරදිව සකස් කිරීම
+// Prepared Statement 
 $stmt = $conn->prepare($sql);
 
 if (count($params) > 0) {
@@ -94,7 +93,7 @@ if (!$result) {
                         <option value="all" <?php echo $expiry_filter == 'all' ? 'selected' : ''; ?>>All Stock (සියල්ල)</option>
                         <option value="safe" <?php echo $expiry_filter == 'safe' ? 'selected' : ''; ?>>Safe Stock (> 7 Days)</option>
                         <option value="critical" <?php echo $expiry_filter == 'critical' ? 'selected' : ''; ?>>Critical (≤ 7 Days)</option>
-                        <option value="expired" <?php echo $expiry_filter == 'expired' ? 'selected' : ''; ?>>Expired (කල් ikuth වූ)</option>
+                        <option value="expired" <?php echo $expiry_filter == 'expired' ? 'selected' : ''; ?>>Expired </option>
                     </select>
                 </div>
 

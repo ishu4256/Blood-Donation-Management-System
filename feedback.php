@@ -1,6 +1,5 @@
 <?php
 session_start();
-// පරිශීලකයා ලොග් වී ඇත්දැයි පරීක්ෂා කිරීම
 if (!isset($_SESSION['username'])) {
     header("Location: login.php");
     exit();
@@ -14,7 +13,7 @@ if ($conn->connect_error) {
 $msg = "";
 
 if (isset($_POST['submit_feedback'])) {
-    $username = $_SESSION['username']; // ලොග් වී සිටින යූසර්ගේ නම
+    $username = $_SESSION['username']; 
     $message = $conn->real_escape_string($_POST['message']);
 
     if (!empty($message)) {

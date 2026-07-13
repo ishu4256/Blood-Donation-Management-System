@@ -1,11 +1,11 @@
 <?php
 session_start();
 
-// PHPMailer සඳහා අවශ්‍ය පන්ති (Classes) ඇතුළත් කිරීම
+// PHPMailer sadaha class hadanna
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-// 💡 Vendor ෆෝල්ඩරයේ පිහිටීමට අනුව PHPMailer files ඇතුළත් කිරීම
+// vendor folder eke pihitima anuwa PHPMailer files athulath kirima
 require __DIR__ . '/vendor/phpmailer/phpmailer/src/Exception.php';
 require __DIR__ . '/vendor/phpmailer/phpmailer/src/PHPMailer.php';
 require __DIR__ . '/vendor/phpmailer/phpmailer/src/SMTP.php';
@@ -68,7 +68,7 @@ if(isset($_POST['register'])){
 
     if($conn->query($sql) === TRUE){
         
-        // 📧 ඊමේල් පණිවිඩය යැවීමේ කොටස
+        // email yawana kotasa
         if(!empty($email)){
             $mail = new PHPMailer(true);
 
@@ -83,7 +83,7 @@ if(isset($_POST['register'])){
                 $mail->Port       = 587;
                 $mail->CharSet    = 'UTF-8';
 
-                // Localhost SSL Error එක මඟහැරීමට
+                // Localhost SSL Error ain karanna
                 $mail->SMTPOptions = array(
                     'ssl' => array(
                         'verify_peer' => false,
@@ -233,7 +233,6 @@ if(isset($_POST['register'])){
                         </div>
                         <div class="col-md-4 mb-3">
                             <label>Province</label>
-                            <!-- 💡 value ලේසි වෙන්න කෙටි කරන ලදී -->
                             <select name="Province" id="provinceSelect" class="form-select" onchange="updateDistricts()" required>
                                 <option value="">Select Province</option>
                                 <option value="Western">Western Province</option>
@@ -306,7 +305,6 @@ if(isset($_POST['register'])){
     </div>
 </div>
 
-<!-- 💡 නිවැරදි කරන ලද JavaScript කේතය -->
 <script>
 function updateDistricts() {
     const provinceSelect = document.getElementById('provinceSelect');

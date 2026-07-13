@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-// Admin කෙනෙක්දැයි පරීක්ෂා කිරීම
 if(!isset($_SESSION['username'])){
     header("Location: login.php");
     exit();
@@ -11,7 +10,6 @@ if($_SESSION['role'] != 'admin'){
     exit();
 }
 
-// Database සම්බන්ධතාවය
 $conn = new mysqli("localhost", "root", "", "blood_donations");
 
 if($conn->connect_error){
@@ -19,34 +17,32 @@ if($conn->connect_error){
 }
 
 
-// ==================== POPUP FORM එකෙන් එන දත්ත DATABASE එකට ඇතුළත් කිරීම ====================
 if(isset($_POST['add_request'])){
-    // Form එකෙන් එන දත්ත ආරක්ෂිතව ලබා ගැනීම (SQL Injection වැළැක්වීමට)
-    $name = $conn->real_escape_string($_POST['patient_name']); // Form එකේ input name එකට ගැලපෙන සේ සැකසුවා
+    $name = $conn->real_escape_string($_POST['patient_name']); 
     $blood_group = $conn->real_escape_string($_POST['blood_group']);
     $hospital_name = $conn->real_escape_string($_POST['hospital_name']);
     $date = $conn->real_escape_string($_POST['date']);
-    $requested_units = isset($_POST['units']) ? intval($_POST['units']) : 1; // Units ලබා ගැනීම
+    $requested_units = isset($_POST['units']) ? intval($_POST['units']) : 1; 
     $status = "Pending"; 
 
-    // පද්ධතියේ මෙම ලේ වර්ගයෙන් ප්‍රමාණවත් තොග තිබේදැයි ස්වයංක්‍රීයව බැලීම
+    // system eke me bload ona tharam thiyedai balanna
     $stock_query = $conn->query("SELECT id, units FROM blood_stock WHERE blood_group = '$blood_group' AND units >= $requested_units LIMIT 1");
 
     $conn->begin_transaction();
     try {
         if ($stock_query && $stock_query->num_rows > 0) {
-            // 👍 තොග තිබේ නම් -> AUTO APPROVE & DEDUCT FROM STOCK
+            // stock thiynawanm AUTO APPROVE & DEDUCT FROM STOCK
             $stock_row = $stock_query->fetch_assoc();
             $stock_id = $stock_row['id'];
 
-            // A. Requests table එකට Approved ලෙස වැටීම
+            //  Requests table ekata Approved lesa watima
             $conn->query("INSERT INTO requests (patient_name, blood_group, units, hospital_name, status, date) 
                           VALUES ('$name', '$blood_group', $requested_units, '$hospital_name', 'Approved', '$date')");
 
-            // B. Stock එකෙන් ස්වයංක්‍රීයව අඩු වීම
+            // B. Stock eken automaticaly adu wima
             $conn->query("UPDATE blood_stock SET units = units - $requested_units WHERE id = $stock_id");
 
-            // C. Blood Releases table එකට දත්ත එකතු කිරීම
+            // C. Blood Releases table ekata data add kirima
             $last_id = $conn->insert_id;
             $conn->query("INSERT INTO blood_releases (booking_id, patient_name, hospital_name, blood_group, units) 
                           VALUES ($last_id, '$name', '$hospital_name', '$blood_group', $requested_units)");
@@ -54,7 +50,7 @@ if(isset($_POST['add_request'])){
             $conn->commit();
             echo "<script>alert('🎉 Stock Available! Request approved and stock updated automatically.'); window.location.href='" . basename($_SERVER['PHP_SELF']) . "';</script>";
         } else {
-            // ⚠️ තොග නොමැති නම් -> AUTO PENDING
+            // stock nathnm -> AUTO PENDING
             $conn->query("INSERT INTO requests (patient_name, blood_group, units, hospital_name, status, date) 
                           VALUES ('$name', '$blood_group', $requested_units, '$hospital_name', 'Pending', '$date')");
             
@@ -73,7 +69,7 @@ if(isset($_POST['add_request'])){
 if(isset($_GET['approve_id'])){
     $approve_id = intval($_GET['approve_id']);
     
-    // මුලින්ම මේ Request එකේ විස්තර (Blood Group සහ Units) ලබා ගැනීම
+    // Blood Group සහ Units
     $req_check = $conn->query("SELECT patient_name, blood_group, units, hospital_name FROM requests WHERE id=$approve_id AND status='Pending'");
     
     if ($req_check && $req_check->num_rows > 0) {
@@ -83,30 +79,29 @@ if(isset($_GET['approve_id'])){
         $b_units = intval($req_data['units']);
         $b_hospital = $conn->real_escape_string($req_data['hospital_name']);
 
-        // Stock එකේ මේ වර්ගයෙන් ලේ බෑග් තියෙනවාදැයි බැලීම
+        // Stock eke me bload thiyada kiyala balana eka
         $stock_check = $conn->query("SELECT id, units FROM blood_stock WHERE blood_group='$b_group' AND units >= $b_units LIMIT 1");
 
         if ($stock_check && $stock_check->num_rows > 0) {
             $stock_data = $stock_check->fetch_assoc();
             $stock_id = $stock_data['id'];
 
-            // 🛑 Transaction එකක් ආරම්භ කිරීම
+            // Transaction ekak start karanna
             $conn->begin_transaction();
             try {
-                // A. Request එක Approved කිරීම
+                // A. Request eka Approved kirima
                 $conn->query("UPDATE requests SET status='Approved' WHERE id=$approve_id");
                 
-                // B. Stock එකෙන් ප්‍රමාණය ස්වයංක්‍රීයව අඩු කිරීම
+                // B. Stock eken count adu kirima
                 $conn->query("UPDATE blood_stock SET units = units - $b_units WHERE id=$stock_id");
 
-                // C. Blood Releases table එකට දත්ත එකතු කිරීම
+                // C. Blood Releases table data add kirima
                 $release_sql = "INSERT INTO blood_releases (booking_id, patient_name, hospital_name, blood_group, units) 
                                 VALUES ($approve_id, '$b_name', '$b_hospital', '$b_group', $b_units)";
                 $conn->query($release_sql);
 
                 $conn->commit();
                 
-                // 💡 ඔබ ඉල්ලූ පරිදි Approve වූ පසු boking.php වෙත දත්ත යැවීම/පිටුවට Redirect කිරීම මෙතනින් සිදුවේ.
                 echo "<script>alert('🎉 Blood request approved, stock updated and released successfully!'); window.location.href='boking.php';</script>";
                 exit();
             } catch (Exception $e) {
@@ -120,7 +115,6 @@ if(isset($_GET['approve_id'])){
 }
 // ====================================================================================
 
-// සියලුම ලේ ඉල්ලීම් අලුත්ම ඒවා මුලට එන සේ ලබා ගැනීම (Latest First)
 $result = $conn->query("SELECT * FROM requests ORDER BY id DESC");
 ?>
 

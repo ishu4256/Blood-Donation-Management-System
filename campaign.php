@@ -1,12 +1,10 @@
 <?php
-// Session එක පරීක්ෂා කිරීම (User ලොගින් වී සිටිය යුතුය)
 session_start();
 if(!isset($_SESSION['username'])){
     header("Location: login.php");
     exit();
 }
 
-// Database සම්බන්ධතාවය
 $conn = new mysqli("localhost", "root", "", "blood_donations");
 
 if($conn->connect_error){
@@ -16,7 +14,6 @@ if($conn->connect_error){
 $message = "";
 $message_class = "";
 
-// ➕ USER DIRECTLY ADD CAMPAIGN LOGIC (පරිශීලකයා කඳවුරක් එකතු කිරීමේ කේතය)
 if(isset($_POST['add_user_campaign'])){
     $title = $conn->real_escape_string($_POST['title']);
     $organizer = $conn->real_escape_string($_POST['organizer']);
@@ -27,7 +24,7 @@ if(isset($_POST['add_user_campaign'])){
     $end_time = $conn->real_escape_string($_POST['end_time']);
     $description = $conn->real_escape_string($_POST['description']);
 
-    // පරිශීලකයෙක් ඇතුළත් කරන නිසා status එක default 'Pending' වේ
+    // user kenek campaign ekak add karana nisa status ek pending widiyata set karanawa. Admin approval ekak awashyai.
     $sql = "INSERT INTO campaigns (title, organizer, location, district, campaign_date, start_time, end_time, description, status) 
             VALUES ('$title', '$organizer', '$location', '$district', '$campaign_date', '$start_time', '$end_time', '$description', 'Pending')";
 
@@ -40,15 +37,14 @@ if(isset($_POST['add_user_campaign'])){
     }
 }
 
-// 🔍 FILTER LOGIC (කඳවුරු පෙිරීමේ කේතය)
-// පරිශීලකයා කිසිවක් තෝරා නොමැති නම් මුලින්ම පෙන්වන්නේ 'Upcoming' කඳවුරු පමණි.
+// user mokuthma filter karala illala nathnm upcoming campaigns display karanawa. default widiyata upcoming campaigns display karanawa.
 $selected_filter = 'Upcoming'; 
 
 if(isset($_GET['status_filter']) && ($_GET['status_filter'] == 'Upcoming' || $_GET['status_filter'] == 'Completed')) {
     $selected_filter = $_GET['status_filter'];
 }
 
-// තෝරාගත් Status එක අනුව පමණක් දත්ත සමුදායෙන් දත්ත ලබා ගැනීම (Pending ඒවා පොදුවේ පෙන්වන්නේ නැත)
+//pending ewa nathuwa upcoming campaigns display karanawa. user ekata upcoming campaigns display karanna ona nisa.
 $filter_status_escaped = $conn->real_escape_string($selected_filter);
 $result = $conn->query("SELECT * FROM campaigns WHERE status = '$filter_status_escaped' ORDER BY campaign_date ASC");
 ?>
@@ -156,7 +152,7 @@ $result = $conn->query("SELECT * FROM campaigns WHERE status = '$filter_status_e
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
             <h3>🗓️ Blood Donation Campaigns List</h3>
             
-            <!-- 🔍 Filter Form (තෝරාගැනීමේ කොටස) -->
+          
             <form method="GET" action="" class="d-flex align-items-center gap-2">
                 <label for="status_filter" class="fw-bold small text-nowrap mb-0">Filter Status:</label>
                 <select name="status_filter" id="status_filter" class="form-select form-select-sm" style="width: 160px;" onchange="this.form.submit()">

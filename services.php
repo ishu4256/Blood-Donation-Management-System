@@ -1,5 +1,4 @@
 <?php
-// Database සම්බන්ධතාවය
 $conn = new mysqli("localhost", "root", "", "blood_donations");
 
 if($conn->connect_error){
@@ -10,30 +9,30 @@ $search_results = null;
 $searched_blood = "";
 $searched_province = "";
 $searched_district = "";
-$modal_open_script = ""; // සෙවීමක් කළ පසු Popup එක නැවත විවෘතව තබා ගැනීමට
+$modal_open_script = ""; // sewimak kala vita popup ek ehenmama thiyaganna
 
-// Search බොත්තම ක්ලික් කළ විට ක්‍රියාත්මක වන කොටස
+// Search button ek click karama wena dewal
 if(isset($_POST['search_blood_submit'])){
     $searched_blood = $conn->real_escape_string($_POST['blood_group']);
     $searched_province = $conn->real_escape_string($_POST['province']);
     $searched_district = $conn->real_escape_string($_POST['district']);
     
-    // Database එකේ ඇති ආකාරයට 'Province' සහ 'Districrt' ලෙස සෙවීම සිදු කරයි
+    // Database  'Province' and 'Districrt' therima
     $query = "SELECT * FROM donor WHERE blood_group = '$searched_blood' AND Province = '$searched_province' AND Districrt = '$searched_district' AND availability_status = 'Available'";
     $search_results = $conn->query($query);
     
-    // පිටුව Refresh වූ පසුත් Popup එක ඉබේම ඇරී තිබීමට සහ කලින් තෝරාගත් දත්ත එලෙසම තබා ගැනීමට JavaScript එකක් සකසයි
+    // page Refresh unata passeth Popup ek ibema ari thibimatath kalin thoragaththa data ehenmama thiyaganna JavaScript ekak sakasai
     $modal_open_script = "<script>
         document.addEventListener('DOMContentLoaded', function() {
             var myModal = new bootstrap.Modal(document.getElementById('blood_searchModal'));
             myModal.show();
             
-            // 💡 කලින් තෝරාගත් පළාතට අදාළ දිස්ත්‍රික්ක dropdown එකට ලෝඩ් කිරීම
+            // select karapu province ekata adala district ek dropdown ekat load kirima
             const provinceSelect = document.getElementById('province');
             provinceSelect.value = '$searched_province';
             provinceSelect.dispatchEvent(new Event('change'));
             
-            // 💡 ඉන්පසු කලින් තෝරාගත් දිස්ත්‍රික්කය Select වී තිබීමට සැලැස්වීම
+            // kalin thoragath disrict ek sdlct wela penna
             document.getElementById('district').value = '$searched_district';
         });
     </script>";
@@ -448,7 +447,7 @@ if(isset($_POST['search_blood_submit'])){
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-// 💡 ලංකාවේ සියලුම පළාත් 9 ට අදාළ දිස්ත්‍රික්ක 25ම ඇතුළත් කළ නිවැරදි සිතියම (Map Object)
+//Map Object 
 const districtMap = {
     "Western": ["Colombo", "Gampaha", "Kalutara"],
     "Central": ["Kandy", "Matale", "Nuwara Eliya"],
@@ -480,7 +479,7 @@ document.getElementById('province').addEventListener('change', function() {
 </script>
 
 <?php 
-// සෙවීමක් කර ඇත්නම් Popup එක විවෘතව තැබීමේ Script එක ක්‍රියාත්මක කිරීම
+// searck karapu ekk Popup ek openwa thabime Script ek kriyathmaka kirima
 if(!empty($modal_open_script)) {
     echo $modal_open_script;
 }
