@@ -23,6 +23,7 @@ $hospitals = $conn->query("SELECT COUNT(*) AS total FROM hospitals")->fetch_asso
 $bookings = $conn->query("SELECT COUNT(*) AS total FROM blood_bookings")->fetch_assoc()['total'];
 $volunteers = $conn->query("SELECT COUNT(*) AS total FROM volunteers")->fetch_assoc()['total'];
 $campaigns = $conn->query("SELECT COUNT(*) AS total FROM campaigns")->fetch_assoc()['total'];
+$donor
 ?>
 
 <?php if(isset($_GET['search_donors'])){ ?>
@@ -180,6 +181,8 @@ window.onload = function(){
                 <h5>Total Donors</h5>
             </div>
         </div>
+
+        
         <div class="col-md-4 col-sm-6">
             <div class="card-box bg-blue">
                 <h2><?php echo $hospitals; ?></h2>
@@ -330,6 +333,8 @@ window.onload = function(){
             <div class="col-md-4"><a href="volunteers.php" class="btn btn-secondary w-100">Volunteers</a></div>
             <div class="col-md-4"><a href="admin_feedback.php" class="btn btn-secondary w-100">Feedback</a></div>
             <div class="col-md-4"><a href="released_list.php" class="btn btn-warning text-dark w-100">Release Blood</a></div>
+<div class="col-md-4"><a href="donor_details.php" class="btn btn-danger w-100">View Donor Details</a></div>
+
         </div>
     </div>
 
