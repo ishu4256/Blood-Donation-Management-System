@@ -72,7 +72,7 @@ if(isset($_GET['approve_id'])){
                         $mail->SMTPAuth = true;
 
                         $mail->Username = 'sandarekaishani83@gmail.com';
-                        $mail->Password = 'zmnr dbgs jxhv kqqk';
+                        $mail->Password = 'zm000bgsjxhvkqqk';
 
                         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                         $mail->Port = 587;

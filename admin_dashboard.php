@@ -333,7 +333,7 @@ window.onload = function(){
             <div class="col-md-4"><a href="volunteers.php" class="btn btn-secondary w-100">Volunteers</a></div>
             <div class="col-md-4"><a href="admin_feedback.php" class="btn btn-secondary w-100">Feedback</a></div>
             <div class="col-md-4"><a href="released_list.php" class="btn btn-warning text-dark w-100">Release Blood</a></div>
-<div class="col-md-4"><a href="donor_details.php" class="btn btn-danger w-100">View Donor Details</a></div>
+<div class="col-md-4"><a href="donor_details.php" class="btn btn-danger w-100">View system User Details</a></div>
 
         </div>
     </div>

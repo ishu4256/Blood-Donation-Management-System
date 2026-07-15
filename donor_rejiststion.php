@@ -78,7 +78,7 @@ if(isset($_POST['register'])){
                 $mail->Host       = 'smtp.gmail.com';
                 $mail->SMTPAuth   = true;
                 $mail->Username   = 'sandarekaishani83@gmail.com'; 
-                $mail->Password   = 'zmnrdbgsjxhvkqqk'; 
+                $mail->Password   = 'zm000bgsjxhvkqqk'; 
                 $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                 $mail->Port       = 587;
                 $mail->CharSet    = 'UTF-8';

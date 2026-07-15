@@ -20,8 +20,10 @@ $result = $conn->query("SELECT * FROM donor ORDER BY donor_id DESC");
         body { font-family: Arial, sans-serif; background: white; color: black; }
         .report-header { border-bottom: 2px solid #8e0000; padding-bottom: 10px; margin-bottom: 30px; }
         .table th { background-color: #8e0000 !important; color: white !important; }
+        
+        /* මෙන්න මේ කොටස වෙනස් කළා */
         @media print {
-            .no-print { display: none; }
+            .no-print { display: none !important; }
             body { padding: 0; }
         }
     </style>
@@ -66,8 +68,5 @@ $result = $conn->query("SELECT * FROM donor ORDER BY donor_id DESC");
         </tbody>
     </table>
 
-    <script>
-        
-    </script>
 </body>
 </html>

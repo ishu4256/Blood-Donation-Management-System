@@ -22,7 +22,11 @@ $result = $conn->query("SELECT * FROM hospitals ORDER BY id DESC");
         body { font-family: Arial, sans-serif; background: white; }
         .report-header { border-bottom: 2px solid #0d6efd; padding-bottom: 10px; margin-bottom: 30px; }
         .table th { background-color: #0d6efd !important; color: white !important; }
-        @media print { .no-print { display: none; } }
+        
+        /* මෙතනට !important එකතු කළා */
+        @media print { 
+            .no-print { display: none !important; } 
+        }
     </style>
 </head>
 <body class="p-4">
