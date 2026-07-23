@@ -34,31 +34,6 @@ Based on the repository layout, here is how the core files function:
 * `/images` & `/uploads` - Directories for static assets and user-uploaded media.
 * `/vendor` - Dependency folder for external libraries or plugins.
 
-## 🔧 Installation & Local Setup
-
-### Prerequisites:
-* XAMPP Server installed on your local machine.
-* PHP 8.0 or higher.
-
-### Step-by-Step Setup:
-1. **Clone the Repository:**
-   ```bash
-  1 Move to XAMPP Root:
-Place the extracted project folder into your C:/xampp/htdocs/ directory.
-
-  2 Database Configuration:
-
-Open phpMyAdmin (http://localhost/phpmyadmin).
-
-Create a database named blood_donations.
-
-Import your project's .sql file into the database.
-
-  3 Run the Project:
-Start Apache and MySQL modules from the XAMPP Control Panel and visit:
-
-Plaintext
-http://localhost/Blood-Donation-Management-System/Dashboard.php
 
 📝 License
 This project is open-source and managed under the MIT License.
