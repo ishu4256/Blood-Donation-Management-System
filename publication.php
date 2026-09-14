@@ -177,7 +177,9 @@ footer a:hover{
         <a href="more.php" class="btn btn-light">More</a>
     </div>
     <hr>
-    <br><br>
+    <br><br><br><br><br>
+    
+    <p>If you have donated blood before and would like to, you can join us as a blood donor.</p><br>
     <a href="donor_rejiststion.php" class="btn btn-light btn-lg fw-bold text-danger">Register as a Donor</a>
 </div>
 

@@ -46,7 +46,7 @@ if (count($having_conditions) > 0) {
     $sql .= " HAVING " . implode(" AND ", $having_conditions);
 }
 
-$sql .= " ORDER BY days_remaining ASC"; 
+$sql .= " ORDER BY collected_date DESC, id DESC"; 
 
 // Prepared Statement 
 $stmt = $conn->prepare($sql);

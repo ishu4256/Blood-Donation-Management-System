@@ -310,7 +310,9 @@ if (!isset($_SESSION['welcome_shown'])) {
 
     <h1>Welcome To <br> Blood Donation Management System <br> Sri Lanka</h1>
     <p>Save Lives - Donate Blood</p>
-    <br><br><br>
+    <br><br><br><br><br>
+    
+    <p>If you have donated blood before and would like to, you can join us as a blood donor.</p><br>
     <h1>
          <a href="donor_rejiststion.php" class="btn btn-light"> Registration as a Donor</a>
     </h1>

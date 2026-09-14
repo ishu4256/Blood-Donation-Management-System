@@ -95,10 +95,23 @@ if(isset($_POST['next'])){
             <input type="text" name="country" required><br>
 
             <label>Province</label>
-            <input type="text" name="province" required><br>
+            <select name="province" id="province" required>
+                <option value="">Select Province</option>
+                <option value="Western">Western Province</option>
+                <option value="Central">Central Province</option>
+                <option value="Southern">Southern Province</option>
+                <option value="Northern">Northern Province</option>
+                <option value="Eastern">Eastern Province</option>
+                <option value="North Western">North Western Province</option>
+                <option value="North Central">North Central Province</option>
+                <option value="Uva">Uva Province</option>
+                <option value="Sabaragamuwa">Sabaragamuwa Province</option>
+            </select><br>
 
             <label>District</label>
-            <input type="text" name="district" required><br>
+            <select name="district" id="district" required>
+                <option value="">Select District</option>
+            </select><br>
 
             <label>Blood Group</label>
             <select name="blood_group" required>
@@ -119,5 +132,31 @@ if(isset($_POST['next'])){
         </form>
     </div>
 
+    <script>
+        const districtsByProvince = {
+            "Western": ["Colombo", "Gampaha", "Kalutara"],
+            "Central": ["Kandy", "Matale", "Nuwara Eliya"],
+            "Southern": ["Galle", "Matara", "Hambantota"],
+            "Northern": ["Jaffna", "Kilinochchi", "Mannar", "Vavuniya", "Mullaitivu"],
+            "Eastern": ["Trincomalee", "Batticaloa", "Ampara"],
+            "North Western": ["Kurunegala", "Puttalam"],
+            "North Central": ["Anuradhapura", "Polonnaruwa"],
+            "Uva": ["Badulla", "Moneragala"],
+            "Sabaragamuwa": ["Ratnapura", "Kegalle"]
+        };
+
+        document.getElementById("province").addEventListener("change", function () {
+            const districtSelect = document.getElementById("district");
+            const districts = districtsByProvince[this.value] || [];
+
+            districtSelect.innerHTML = '<option value="">Select District</option>';
+            districts.forEach(function (district) {
+                const option = document.createElement("option");
+                option.value = district;
+                option.textContent = district;
+                districtSelect.appendChild(option);
+            });
+        });
+    </script>
 </body>
 </html>

@@ -57,7 +57,7 @@ $result = $conn->query($sql);
             <div class="container-box">
 
                 <div class="border-bottom pb-2 mb-4 d-flex justify-content-between align-items-center">
-                    <h2 class="text-danger fw-bold m-0">📋 Donor Comprehensive Details</h2>
+                    <h2 class="text-danger fw-bold m-0">📋 Users Details</h2>
                     <a href="admin_dashboard.php" class="btn btn-secondary fw-bold">← Back to Dashboard</a>
                 </div>
 

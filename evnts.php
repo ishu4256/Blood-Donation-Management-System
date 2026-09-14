@@ -52,6 +52,9 @@ $camps_res = $conn->query("SELECT * FROM campaigns WHERE campaign_date >= '$curr
             font-weight: 800;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
+         .hero p{
+            font-size:25px;
+        }
         .nav-buttons .btn {
             margin: 6px;
             font-weight: 600;
@@ -217,6 +220,9 @@ $camps_res = $conn->query("SELECT * FROM campaigns WHERE campaign_date >= '$curr
         <a href="more.php" class="btn btn-light">More</a>
     </div>
     <hr class="opacity-25 my-4">
+    <br><br><br>
+    
+    <p>If you have donated blood before and would like to, you can join us as a blood donor.</p><br>
     <h1>
         <a href="donor_rejiststion.php" class="btn btn-light btn-lg fw-bold text-danger shadow-sm">Registration as a Donor</a>
     </h1>

@@ -40,6 +40,9 @@ if (!empty($selected_district)) {
         body{ font-family: Arial, sans-serif; background:#f4f6f9; margin:0; padding:0; }
         .top-bar{ background:#8e0000; padding:10px 30px; text-align:right; }
         .top-bara{ text-align:center; }
+         .hero p{
+            font-size:25px;
+        }
         .hero{
             background:linear-gradient(rgba(192,57,43,0.9), rgba(192,57,43,0.9)), url('images/pic1.jpg');
             background-size:cover; background-position:center; color:white; padding:80px 20px; text-align:center;
@@ -123,7 +126,9 @@ if (!empty($selected_district)) {
         <a href="more.php" class="btn btn-light">More</a>
     </div>
     <hr>
-    <br><br><br>
+    <br><br><br><br><br><br>
+    
+    <p>If you have donated blood before and would like to, you can join us as a blood donor.</p><br>
     <h1>
         <a href="donor_rejiststion.php" class="btn btn-light btn-lg fw-bold text-danger shadow-sm">Registration as a Donor</a>
     </h1>

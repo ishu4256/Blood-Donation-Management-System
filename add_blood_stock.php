@@ -37,24 +37,49 @@ $message_class = "";
 
 //blood stock add karana eka
 if(isset($_POST['submit_stock'])){
-    $district = $_POST['district']; 
-    $hospital_name = $_POST['hospital_name']; 
-    $blood_group = strtoupper($_POST['blood_group']); // Capital O/A/B කිරීමට
-    $units = intval($_POST['units']);
+    $district = $conn->real_escape_string($_POST['district']);
+    $hospital_name = $conn->real_escape_string($_POST['hospital_name']);
+    $units_by_group = isset($_POST['units']) && is_array($_POST['units']) ? $_POST['units'] : [];
+    $added_groups = 0;
 
-    if(!empty($district) && !empty($hospital_name) && !empty($blood_group) && $units > 0){
-        
-        $stmt = $conn->prepare("INSERT INTO blood_stock (name, district, blood_group, units, collected_date) 
-                                VALUES (?, ?, ?, ?, CURDATE()) 
-                                ON DUPLICATE KEY UPDATE units = units + ?");
-        
-        $stmt->bind_param("sssii", $hospital_name, $district, $blood_group, $units, $units);
-        
-        if($stmt->execute()){
-            $message = "Blood stock successfully added/updated!";
+    if(!empty($district) && !empty($hospital_name)){
+        $conn->begin_transaction();
+        try {
+            foreach($units_by_group as $blood_group => $group_units){
+                $blood_group = strtoupper($conn->real_escape_string($blood_group));
+                $units = intval($group_units);
+
+                if($units <= 0){
+                    continue;
+                }
+
+                $stock_res = $conn->query("SELECT id FROM blood_stock WHERE district = '$district' AND name = '$hospital_name' AND blood_group = '$blood_group' AND collected_date = CURDATE() LIMIT 1");
+
+                if($stock_res && $stock_res->num_rows > 0){
+                    $stock_row = $stock_res->fetch_assoc();
+                    $stock_id = intval($stock_row['id']);
+                    $query_success = $conn->query("UPDATE blood_stock SET units = units + $units WHERE id = $stock_id");
+                } else {
+                    $query_success = $conn->query("INSERT INTO blood_stock (name, district, blood_group, units, collected_date) VALUES ('$hospital_name', '$district', '$blood_group', $units, CURDATE())");
+                }
+
+                if(!$query_success){
+                    throw new Exception($conn->error);
+                }
+
+                $added_groups++;
+            }
+
+            if($added_groups === 0){
+                throw new Exception('Enter units for at least one blood group.');
+            }
+
+            $conn->commit();
+            $message = "Blood stock successfully added/updated for $added_groups blood group(s)!";
             $message_class = "alert-success";
-        } else {
-            $message = "Error: " . $conn->error;
+        } catch (Exception $e) {
+            $conn->rollback();
+            $message = "Error: " . $e->getMessage();
             $message_class = "alert-danger";
         }
     } else {
@@ -110,23 +135,16 @@ if(isset($_POST['submit_stock'])){
             </div>
 
             <div class="mb-3">
-                <label class="form-label fw-bold">Blood Group</label>
-                <select name="blood_group" class="form-control" required>
-                    <option value="">-- Select Blood Group --</option>
-                    <option value="A+">A+</option>
-                    <option value="A-">A-</option>
-                    <option value="B+">B+</option>
-                    <option value="B-">B-</option>
-                    <option value="AB+">AB+</option>
-                    <option value="AB-">AB-</option>
-                    <option value="O+">O+</option>
-                    <option value="O-">O-</option>
-                </select>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label fw-bold">Number of Units (Bags)</label>
-                <input type="number" name="units" class="form-control" placeholder="e.g. 10" min="1" required>
+                <label class="form-label fw-bold">Units by Blood Group (Bags)</label>
+                <div class="row g-2">
+                    <?php foreach(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] as $blood_group): ?>
+                        <div class="col-6">
+                            <label class="form-label small mb-1"><?php echo $blood_group; ?></label>
+                            <input type="number" name="units[<?php echo $blood_group; ?>]" class="form-control" min="0" placeholder="0">
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+                <div class="form-text">Enter quantities for one or more groups. Empty fields are ignored.</div>
             </div>
 
             <div class="d-grid gap-2">

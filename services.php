@@ -221,7 +221,9 @@ if(isset($_POST['search_blood_submit'])){
     </div>
 
     <hr>
-    <br><br><br>
+    <br><br><br><br><br>
+    
+    <p>If you have donated blood before and would like to, you can join us as a blood donor.</p><br>
     <h1>
         <a href="donor_rejiststion.php" class="btn btn-light"> Registration as a Donor</a>
     </h1>

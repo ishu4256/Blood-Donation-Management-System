@@ -85,7 +85,7 @@ $result = $conn->query($sql);
                 <select name="status_filter" class="form-select border-danger" style="min-width: 200px;">
                     <option value="">-- All Availability Status --</option>
                     <option value="Available" <?php if($filter_status == 'Available') echo 'selected'; ?>>Available Only</option>
-                    <option value="Not Available" <?php if($filter_status == 'Not Available') echo 'selected'; ?>>Not Available Only</option>
+                    <option value="Unavailable" <?php if($filter_status == 'Unavailable') echo 'selected'; ?>>Unavailable Only</option>
                 </select>
                 <button type="submit" class="btn btn-danger fw-bold">Filter</button>
                 <?php if($filter_status !== "") { ?>

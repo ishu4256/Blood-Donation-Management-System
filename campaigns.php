@@ -129,35 +129,52 @@ if(isset($_GET['approve_id'])){
 if(isset($_POST['add_direct_stock'])){
     $district = $conn->real_escape_string($_POST['direct_district']);
     $hospital_name = $conn->real_escape_string($_POST['direct_hospital']); 
-    $blood_group = strtoupper($conn->real_escape_string($_POST['direct_blood_group'])); // Capitalize Group
-    $units = intval($_POST['direct_units']);
     $collected_date = $conn->real_escape_string($_POST['direct_collected_date']); 
+    $units_by_group = isset($_POST['direct_units']) && is_array($_POST['direct_units']) ? $_POST['direct_units'] : [];
+    $added_groups = 0;
 
-    // ekama dawase ekama hospital ekata ekama blood group ekata stock update karanna.
-    $stock_res = $conn->query("SELECT id FROM blood_stock WHERE district = '$district' AND name = '$hospital_name' AND blood_group = '$blood_group' AND collected_date = '$collected_date' LIMIT 1");
+    if(!empty($district) && !empty($hospital_name) && !empty($collected_date)){
+        $conn->begin_transaction();
+        try {
+            foreach($units_by_group as $blood_group => $group_units){
+                $blood_group = strtoupper($conn->real_escape_string($blood_group));
+                $units = intval($group_units);
 
-    if($stock_res && $stock_res->num_rows > 0){
-        // thiyanwanm units update karanna
-        $stock_row = $stock_res->fetch_assoc();
-        $stock_id = $stock_row['id'];
-        $update_query = "UPDATE blood_stock SET units = units + $units WHERE id = $stock_id";
-        
-        if($conn->query($update_query)){
-            echo "<script>alert('🎉 Blood stock updated successfully for $hospital_name!'); window.location.href='blood_stock.php';</script>";
+                if($units <= 0){
+                    continue;
+                }
+
+                $stock_res = $conn->query("SELECT id FROM blood_stock WHERE district = '$district' AND name = '$hospital_name' AND blood_group = '$blood_group' AND collected_date = '$collected_date' LIMIT 1");
+
+                if($stock_res && $stock_res->num_rows > 0){
+                    $stock_row = $stock_res->fetch_assoc();
+                    $stock_id = intval($stock_row['id']);
+                    $query_success = $conn->query("UPDATE blood_stock SET units = units + $units WHERE id = $stock_id");
+                } else {
+                    $query_success = $conn->query("INSERT INTO blood_stock (name, district, blood_group, units, collected_date) VALUES ('$hospital_name', '$district', '$blood_group', $units, '$collected_date')");
+                }
+
+                if(!$query_success){
+                    throw new Exception($conn->error);
+                }
+
+                $added_groups++;
+            }
+
+            if($added_groups === 0){
+                throw new Exception('Enter units for at least one blood group.');
+            }
+
+            $conn->commit();
+            echo "<script>alert('🎉 Blood stock added successfully for $added_groups blood group(s)!'); window.location.href='blood_stock.php';</script>";
             exit();
-        } else {
-            echo "Error updating stock: " . $conn->error;
+        } catch (Exception $e) {
+            $conn->rollback();
+            echo "<script>alert('❌ Stock update failed: " . addslashes($e->getMessage()) . "'); window.location.href='campaigns.php';</script>";
+            exit();
         }
     } else {
-        // nathnm new stock ekak insert karanna district ek saha hospital name ekata.
-        $insert_query = "INSERT INTO blood_stock (name, district, blood_group, units, collected_date) VALUES ('$hospital_name', '$district', '$blood_group', $units, '$collected_date')";
-        
-        if($conn->query($insert_query)){
-            echo "<script>alert('🎉 New blood stock manually added successfully!'); window.location.href='blood_stock.php';</script>";
-            exit();
-        } else {
-            echo "Error inserting stock: " . $conn->error;
-        }
+        echo "<script>alert('Please select district, hospital and collected date.');</script>";
     }
 }
 
@@ -195,9 +212,9 @@ if(isset($_POST['update_campaign'])){
 //  CAMPAIGN COMPLETION & REGIONAL STOCK UPDATE LOGIC
 if(isset($_POST['complete_campaign'])){
     $campaign_id = intval($_POST['campaign_id']);
-    $blood_group = strtoupper($conn->real_escape_string($_POST['blood_group']));
-    $units = intval($_POST['units']);
     $collected_date = $conn->real_escape_string($_POST['collected_date']); 
+    $units_by_group = isset($_POST['complete_units']) && is_array($_POST['complete_units']) ? $_POST['complete_units'] : [];
+    $added_groups = 0;
 
     // campign eke district eka ganna. e district ekata hospital name ekak set karanawa. (ex: Colombo General Hospital)
     $camp_res = $conn->query("SELECT district FROM campaigns WHERE id = $campaign_id AND (status != 'Completed' OR status IS NULL)");
@@ -209,22 +226,43 @@ if(isset($_POST['complete_campaign'])){
 
         $conn->begin_transaction();
         try {
-            $conn->query("UPDATE campaigns SET status = 'Completed' WHERE id = $campaign_id");
-            
-            $stock_res = $conn->query("SELECT id FROM blood_stock WHERE district = '$district' AND blood_group = '$blood_group' AND name = '$hospital_name' AND collected_date = '$collected_date' LIMIT 1");
+            foreach($units_by_group as $blood_group => $group_units){
+                $blood_group = strtoupper($conn->real_escape_string($blood_group));
+                $units = intval($group_units);
 
-            if($stock_res && $stock_res->num_rows > 0){
-                $conn->query("UPDATE blood_stock SET units = units + $units WHERE district = '$district' AND blood_group = '$blood_group' AND name = '$hospital_name' AND collected_date = '$collected_date'");
-            } else {
-                $conn->query("INSERT INTO blood_stock (name, district, blood_group, units, collected_date) VALUES ('$hospital_name', '$district', '$blood_group', $units, '$collected_date')");
+                if($units <= 0){
+                    continue;
+                }
+
+                $stock_res = $conn->query("SELECT id FROM blood_stock WHERE district = '$district' AND blood_group = '$blood_group' AND name = '$hospital_name' AND collected_date = '$collected_date' LIMIT 1");
+
+                if($stock_res && $stock_res->num_rows > 0){
+                    $stock_row = $stock_res->fetch_assoc();
+                    $stock_id = intval($stock_row['id']);
+                    $query_success = $conn->query("UPDATE blood_stock SET units = units + $units WHERE id = $stock_id");
+                } else {
+                    $query_success = $conn->query("INSERT INTO blood_stock (name, district, blood_group, units, collected_date) VALUES ('$hospital_name', '$district', '$blood_group', $units, '$collected_date')");
+                }
+
+                if(!$query_success){
+                    throw new Exception($conn->error);
+                }
+
+                $added_groups++;
             }
 
+            if($added_groups === 0){
+                throw new Exception('Enter units for at least one blood group.');
+            }
+
+            $conn->query("UPDATE campaigns SET status = 'Completed' WHERE id = $campaign_id");
+
             $conn->commit();
-            echo "<script>alert('🎉 Campaign marked as Completed! Stock added successfully.'); window.location.href='blood_stock.php';</script>";
+            echo "<script>alert('🎉 Campaign marked as Completed! Stock added for $added_groups blood group(s).'); window.location.href='blood_stock.php';</script>";
             exit();
         } catch (Exception $e) {
             $conn->rollback();
-            echo "<script>alert('Error occurred while updating stock.');</script>";
+            echo "<script>alert('❌ Campaign completion failed: " . addslashes($e->getMessage()) . "');</script>";
         }
     }
 }
@@ -303,23 +341,16 @@ $result = $conn->query("SELECT * FROM campaigns ORDER BY id DESC");
                     </select>
                 </div>
 
-                <div class="col-md-2">
-                    <label class="form-label fw-bold small">Blood Group</label>
-                    <select name="direct_blood_group" class="form-select form-select-sm" required>
-                        <option value="A+">A+</option>
-                        <option value="A-">A-</option>
-                        <option value="B+">B+</option>
-                        <option value="B-">B-</option>
-                        <option value="O+">O+</option>
-                        <option value="O-">O-</option>
-                        <option value="AB+">AB+</option>
-                        <option value="AB-">AB-</option>
-                    </select>
-                </div>
-
-                <div class="col-md-2">
-                    <label class="form-label fw-bold small">Units (බෑග් ගණන)</label>
-                    <input type="number" name="direct_units" class="form-control form-control-sm text-start" min="1" placeholder="Ex: 20" required>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold small">Units by Blood Group (බෑග් ගණන)</label>
+                    <div class="row g-1">
+                        <?php foreach(['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'] as $blood_group): ?>
+                            <div class="col-3">
+                                <label class="form-label small mb-0"><?php echo $blood_group; ?></label>
+                                <input type="number" name="direct_units[<?php echo $blood_group; ?>]" class="form-control form-control-sm" min="0" placeholder="0">
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
 
                 <div class="col-md-2">
@@ -489,21 +520,16 @@ $result = $conn->query("SELECT * FROM campaigns ORDER BY id DESC");
                                             <input type="date" name="collected_date" class="form-control" value="<?php echo $row['campaign_date']; ?>" required>
                                         </div>
                                         <div class="mb-3">
-                                            <label class="form-label fw-bold">Blood Group</label>
-                                            <select name="blood_group" class="form-select" required>
-                                                <option value="A+">A+</option>
-                                                <option value="A-">A-</option>
-                                                <option value="B+">B+</option>
-                                                <option value="B-">B-</option>
-                                                <option value="O+">O+</option>
-                                                <option value="O-">O-</option>
-                                                <option value="AB+">AB+</option>
-                                                <option value="AB-">AB-</option>
-                                            </select>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold">Collected Units</label>
-                                            <input type="number" name="units" class="form-control text-start" min="1" placeholder="Ex: 35" required>
+                                            <label class="form-label fw-bold">Collected Units by Blood Group</label>
+                                            <div class="row g-2">
+                                                <?php foreach(['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'] as $blood_group): ?>
+                                                    <div class="col-6">
+                                                        <label class="form-label small mb-1"><?php echo $blood_group; ?></label>
+                                                        <input type="number" name="complete_units[<?php echo $blood_group; ?>]" class="form-control" min="0" placeholder="0">
+                                                    </div>
+                                                <?php endforeach; ?>
+                                            </div>
+                                            <div class="form-text">Enter quantities for one or more blood groups. Empty fields are ignored.</div>
                                         </div>
                                     </div>
                                     <div class="modal-footer">
