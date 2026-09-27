@@ -61,7 +61,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             align-items: center;
         }
         
-        /* Heading එක photo එක වහන්නේ නැති වෙන්න transparent කළා */
         h1 { 
             background-color: rgba(255, 0, 0, 0.75); 
             color: white; 
@@ -84,7 +83,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             letter-spacing: 2px;
         }
         
-        /* මැද තියෙන ලේ බින්දුව පේන්න box එක විනිවිද පෙනෙන විදිහට හැදුවා */
         .login-box { 
             width: 450px; 
             margin: 20px auto; 
@@ -162,7 +160,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             transform: translateY(-2px);
         }
         
-        /* Links කියවන්න ලේසි වෙන්න light blue පාට කළා */
         .link-btn { 
             text-decoration: none; 
             color: #80c1ff; 

@@ -22,7 +22,6 @@ $lives_saved = 0;
 $release_res = $conn->query("SELECT SUM(units) AS total_released FROM blood_releases");
 if($release_res) {
     $release_row = $release_res->fetch_assoc();
-    // තවම කිසිවක් රිලීස් කර නැත්නම් 0 පෙන්වීමට null coalescing (?? 0) භාවිත කර ඇත
     $lives_saved = $release_row['total_released'] ?? 0; 
 }
 

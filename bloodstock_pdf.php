@@ -26,7 +26,6 @@ $result = $conn->query($sql);
         .report-header { border-bottom: 2px solid #198754; padding-bottom: 10px; margin-bottom: 30px; }
         .table th { background-color: #198754 !important; color: white !important; text-align: center; }
         
-        /* මෙතනට !important එකතු කළා */
         @media print { 
             .no-print { display: none !important; } 
         }

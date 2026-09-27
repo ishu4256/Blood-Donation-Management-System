@@ -94,7 +94,6 @@ if (!empty($selected_district)) {
     background:rgba(108, 78, 78, 0.45);
     z-index:2;
 }
-        /* New Custom Layout Styles */
         .search-box { background: #fff; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .map-container { border-radius: 15px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .donor-badge { background: #c0392b; color: white; padding: 4px 10px; border-radius: 20px; font-size: 13px; }

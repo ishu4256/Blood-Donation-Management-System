@@ -1,3 +1,42 @@
+<?php
+// Database connection (ඔබගේ Connection code එක මෙතැන ඇත)
+// $conn = new mysqli("localhost", "username", "password", "database_name");
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+    // සාමාන්‍ය Input Fields Clean කරගැනීම
+    $name  = $conn->real_escape_string($_POST['name'] ?? '');
+    $email = $conn->real_escape_string($_POST['email'] ?? '');
+    $phone = $conn->real_escape_string($_POST['phone'] ?? '');
+    $area  = $conn->real_escape_string($_POST['area'] ?? '');
+
+    // Preferred Area (Checkboxes / Array) Handling
+    if (isset($_POST['preferred_area']) && is_array($_POST['preferred_area'])) {
+        // 1. Array එකේ ඇති සියලුම items sanitizing කරගැනීම
+        $clean_areas = array_map(function($item) use ($conn) {
+            return $conn->real_escape_string($item);
+        }, $_POST['preferred_area']);
+
+        // 2. Array එක Comma-separated String එකක් බවට පත්කිරීම (e.g., "Event Organizing, Crowd Control")
+        $preferred_area = implode(", ", $clean_areas);
+    } else {
+        $preferred_area = "None";
+    }
+
+    // Database Insert Query එක
+    $sql = "INSERT INTO volunteers (name, email, phone, district, preferred_area) 
+            VALUES ('$name', '$email', '$phone', '$area', '$preferred_area')";
+
+    if ($conn->query($sql) === TRUE) {
+        echo "<script>alert('Volunteer registration successful!'); window.location.href='more.php';</script>";
+    } else {
+        echo "Error: " . $sql . "<br>" . $conn->error;
+    }
+}
+?>
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,7 +46,7 @@
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-       body{ font-family: Arial, sans-serif; background:#f4f6f9; margin:0; padding:0; }
+        body{ font-family: Arial, sans-serif; background:#f4f6f9; margin:0; padding:0; }
         .top-bar{ background:#8e0000; padding:10px 30px; text-align:right; }
         .top-bara{ text-align:center; }
         .hero{
@@ -15,7 +54,7 @@
             background-size:cover; background-position:center; color:white; padding:80px 20px; text-align:center;
         }
         .hero h1{ font-size:60px; font-weight:bold; }
-         .hero p{
+        .hero p{
             font-size:25px;
         }
         .nav-buttons .btn{ margin:8px; font-weight:bold; }
@@ -87,7 +126,7 @@
         }
         
         /* Footer Styling */
-         footer{ background:#8e0000; color:white; padding:40px 20px; }
+        footer{ background:#8e0000; color:white; padding:40px 20px; }
         footer a{ color:white; text-decoration:none; display:block; margin-bottom:10px; }
         footer a:hover{ text-decoration:underline; }
         
@@ -139,22 +178,18 @@
     </div>
     <hr>
     <!-- Sub Shortcuts Links -->
-        <div class="nav-buttons sub-nav mt-3 justify-content-center d-flex flex-wrap">
-            <button class="btn btn-sm mx-1" onclick="window.open('hospital.php','Hospitals','width=900,height=600')">🏥 Hospitals</button>
-            <button class="btn btn-sm mx-1" onclick="window.open('check_blood.php','BloodStock','width=900,height=600')">🩸 Blood Stock</button>
-            <button class="btn btn-sm mx-1" onclick="window.open('campaign.php','Campaign','width=900,height=600')">📢 Campaigns</button>
-            <button class="btn btn-sm mx-1" onclick="window.open('feedback.php','Feedback','width=900,height=600')">⭐ Feedback</button>
-        </div>
-        <br><br><br><br><br>
+    <div class="nav-buttons sub-nav mt-3 justify-content-center d-flex flex-wrap">
+        <button class="btn btn-sm mx-1" onclick="window.open('hospital.php','Hospitals','width=900,height=600')">🏥 Hospitals</button>
+        <button class="btn btn-sm mx-1" onclick="window.open('check_blood.php','BloodStock','width=900,height=600')">🩸 Blood Stock</button>
+        <button class="btn btn-sm mx-1" onclick="window.open('campaign.php','Campaign','width=900,height=600')">📢 Campaigns</button>
+        <button class="btn btn-sm mx-1" onclick="window.open('feedback.php','Feedback','width=900,height=600')">⭐ Feedback</button>
+    </div>
+    <br><br><br><br><br>
     
     <p>If you have donated blood before and would like to, you can join us as a blood donor.</p><br>
     <h1>
         <a href="donor_rejiststion.php" class="btn btn-light btn-lg fw-bold text-danger shadow-sm">Registration as a Donor</a>
     </h1>
-        
-    </div>
-    </div>
-
 </div>
 
 <!-- MAIN CONTENT CONTAINER -->
@@ -279,7 +314,7 @@
                         <input type="tel" name="phone" class="form-control" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-bold small">Area / District (දිස්ත්‍රික්කය)</label>
+                        <label class="form-label fw-bold small">District / Area (දිස්ත්‍රික්කය)</label>
                         <select name="area" class="form-select" required>
                             <option value="" disabled selected>Select District</option>
                             <option value="Colombo">Colombo</option>
@@ -297,6 +332,32 @@
                             <option value="Ratnapura">Ratnapura</option>
                             <option value="Kegalle">Kegalle</option>
                         </select>
+                    </div>
+                    <!-- Preferred Volunteer Area Field (Added) -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Preferred Volunteer Area (සහාය දැක්වීමට කැමති ක්ෂේත්‍රය)</label>
+                        <div class="border rounded p-3 bg-light">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" name="preferred_area[]" value="Event Organizing" id="pref1">
+                                <label class="form-check-label small" for="pref1">Event Organizing (සංවිධාන කටයුතු)</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" name="preferred_area[]" value="Crowd & Logistics Control" id="pref2">
+                                <label class="form-check-label small" for="pref2">Crowd & Logistics Control (ප්‍රවාහන සහ ජන සමූහ පාලනය)</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" name="preferred_area[]" value="Media & Awareness Creation" id="pref3">
+                                <label class="form-check-label small" for="pref3">Media & Awareness Creation (ප්‍රචාරණ සහ දැනුවත් කිරීම්)</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" name="preferred_area[]" value="Donor Registration Support" id="pref4">
+                                <label class="form-check-label small" for="pref4">Donor Registration Support (ලියාපදිංචි කිරීමේ සහාය)</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="preferred_area[]" value="First Aid & Emergency Assistance" id="pref5">
+                                <label class="form-check-label small" for="pref5">First Aid & Technical Support (ප්‍රථමාධාර සහ තාක්ෂණික සහාය)</label>
+                            </div>
+                        </div>
                     </div>
                     <button type="submit" class="btn btn-danger w-100 fw-bold py-2 rounded shadow-sm">Submit Application</button>
                 </form>
