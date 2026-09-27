@@ -14,7 +14,6 @@ if ($conn->connect_error) {
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
-    // Form Inputs ලබා ගැනීම
     $name  = trim($_POST['name'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $phone = trim($_POST['phone'] ?? '');
@@ -23,7 +22,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Preferred Area (Checkboxes / Array හෝ Single value handling)
     if (isset($_POST['preferred_area'])) {
         if (is_array($_POST['preferred_area'])) {
-            // Checkbox arrays එකතු කර Comma-separated string එකක් බවට පත්කිරීම
             $clean_areas = array_map('htmlspecialchars', $_POST['preferred_area']);
             $preferred_area = implode(", ", $clean_areas);
         } else {
